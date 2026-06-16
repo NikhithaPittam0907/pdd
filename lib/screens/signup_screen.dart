@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
 import 'signin_screen.dart';
 import '../config/api_config.dart';
 
@@ -26,7 +27,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final String baseUrl = ApiConfig.baseUrl;
 
   Future<void> signUpUser() async {
-    if (passwordController.text != confirmController.text) {
+    final pwd = passwordController.text;
+    if (pwd.length < 8 ||
+        !pwd.contains(RegExp(r'[A-Z]')) ||
+        !pwd.contains(RegExp(r'[a-z]')) ||
+        !pwd.contains(RegExp(r'[0-9]')) ||
+        !pwd.contains(RegExp(r'[!@#\$&*~_]'))) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Password must be at least 8 characters, contain uppercase, lowercase, number, and special character."),
+        duration: Duration(seconds: 4),
+      ));
+      return;
+    }
+
+    if (pwd != confirmController.text) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Passwords do not match")));
@@ -57,6 +71,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ).showSnackBar(SnackBar(content: Text(data["message"])));
 
       if (response.statusCode == 201) {
+        // Trigger the "Save Password" prompt
+        TextInput.finishAutofillContext();
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const SignInScreen()),
@@ -76,6 +93,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     required String hint,
     required TextEditingController controller,
     bool isPassword = false,
+    Iterable<String>? autofillHints,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,6 +110,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         TextField(
           controller: controller,
           obscureText: isPassword ? obscure : false,
+          autofillHints: autofillHints,
+          keyboardType: isPassword ? TextInputType.visiblePassword : TextInputType.emailAddress,
           style: GoogleFonts.inter(),
           decoration: InputDecoration(
             hintText: hint,
@@ -224,24 +244,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           BoxShadow(color: Colors.black12, blurRadius: 8),
                         ],
                       ),
-                      child: Column(
-                        children: [
+                      child: AutofillGroup(
+                        child: Column(
+                          children: [
                           buildField(
                             label: "Full Name",
                             hint: "Enter your name",
                             controller: nameController,
+                            autofillHints: const [AutofillHints.name],
                           ),
                           const SizedBox(height: 16),
-                          buildField(
+                           buildField(
                             label: "Email",
                             hint: "name@email.com",
                             controller: emailController,
+                            autofillHints: const [AutofillHints.email],
                           ),
                           const SizedBox(height: 16),
-                          buildField(
+                           buildField(
                             label: "Phone",
                             hint: "9876543210",
                             controller: phoneController,
+                            autofillHints: const [AutofillHints.telephoneNumber],
                           ),
                           const SizedBox(height: 16),
                           buildField(
@@ -249,6 +273,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             hint: "••••••••",
                             controller: passwordController,
                             isPassword: true,
+                            autofillHints: const [AutofillHints.newPassword],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            "Must be 8+ chars with uppercase, lowercase, number & special char.",
+                            style: GoogleFonts.inter(fontSize: 11, color: Colors.black54),
                           ),
                           const SizedBox(height: 16),
                           buildField(
@@ -256,6 +286,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             hint: "••••••••",
                             controller: confirmController,
                             isPassword: true,
+                            autofillHints: const [AutofillHints.newPassword],
                           ),
                           const SizedBox(height: 16),
 
@@ -276,6 +307,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               DropdownMenuItem(
                                 value: "lawyer",
                                 child: Text("Lawyer"),
+                              ),
+                              DropdownMenuItem(
+                                value: "police",
+                                child: Text("Police"),
                               ),
                               DropdownMenuItem(
                                 value: "admin",
@@ -340,6 +375,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ],
                       ),
                     ),
+                  ),
                   ],
                 ),
               ),

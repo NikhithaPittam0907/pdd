@@ -8,10 +8,20 @@ import 'my_cases.dart';
 import 'billing.dart';
 import 'case_submission.dart';
 import 'edit_profile.dart';
+import 'domestic_violence_flow.dart';
+import 'land_fraud_flow.dart';
+import 'cyber_crime_flow.dart';
+import 'traffic_issue_flow.dart';
+import 'women_safety_flow.dart';
+import 'employee_rights_flow.dart';
+import 'tenant_issue_flow.dart';
+import 'consumer_complaint_flow.dart';
+import 'student_issue_flow.dart';
+import 'accident_claim_flow.dart';
+import '../screens/signin_screen.dart';
 
 class ClientDashboard extends StatefulWidget {
   const ClientDashboard({super.key});
-
   @override
   State<ClientDashboard> createState() => _ClientDashboardState();
 }
@@ -29,9 +39,20 @@ class _ClientDashboardState extends State<ClientDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: pages[currentIndex],
-      floatingActionButton: FloatingActionButton(
+    return WillPopScope(
+      onWillPop: () async {
+        if (currentIndex != 0) {
+          setState(() {
+            currentIndex = 0;
+          });
+          return false;
+        }
+        // Prevents the app from closing to keep 'flutter run' active
+        return false;
+      },
+      child: Scaffold(
+        body: pages[currentIndex],
+        floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFF001A3A),
         onPressed: () {
           setState(() {
@@ -80,6 +101,7 @@ class _ClientDashboardState extends State<ClientDashboard> {
           ),
         ],
       ),
+      ),
     );
   }
 }
@@ -92,7 +114,17 @@ class ClientHomePage extends StatefulWidget {
 }
 
 class _ClientHomePageState extends State<ClientHomePage> {
-  String userName = "Sarah"; // Default to Sarah from image if not found
+  String userName = "Sarah";
+  String searchQuery = "";
+
+  final List<Map<String, dynamic>> categories = [
+    {"name": "Domestic Violence", "icon": Icons.family_restroom, "color": const Color(0xFFE57373)},
+    {"name": "Land Dispute", "icon": Icons.landscape, "color": const Color(0xFF81C784)},
+    {"name": "Cyber Crime", "icon": Icons.computer, "color": const Color(0xFF64B5F6)},
+    {"name": "Employee Rights", "icon": Icons.work_outline, "color": const Color(0xFF7986CB)},
+    {"name": "Tenant Issue", "icon": Icons.house_outlined, "color": const Color(0xFFA1887F)},
+    {"name": "Consumer Complaint", "icon": Icons.shopping_bag_outlined, "color": const Color(0xFF4DB6AC)},
+  ];
 
   @override
   void initState() {
@@ -110,155 +142,92 @@ class _ClientHomePageState extends State<ClientHomePage> {
     }
   }
 
-  Widget quickActionCard({
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required String subtitle,
-    required Color bgColor,
-    bool hasBorder = false,
-    VoidCallback? onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(12),
-          border: hasBorder ? Border.all(color: Colors.grey.shade200) : null,
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: iconColor, size: 22),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF0B132B),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      color: Colors.black54,
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  String get _greeting {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
   }
 
-  Widget activityListTile({
-    required IconData icon,
-    required Color iconBg,
-    required Color iconColor,
-    required String titleText,
-    required String titleBold,
-    required String subtitle,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: iconBg,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: iconColor, size: 18),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                RichText(
-                  text: TextSpan(
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: const Color(0xFF0B132B),
-                      height: 1.4,
-                    ),
-                    children: [
-                      TextSpan(text: titleText),
-                      TextSpan(
-                        text: titleBold,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  subtitle,
-                  style: GoogleFonts.inter(
-                    fontSize: 11,
-                    color: Colors.black54,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Icon(Icons.more_horiz, color: Colors.grey, size: 18),
-        ],
-      ),
-    );
-  }
-
-  Widget caseStatusRow({
-    required Color dotColor,
-    required String label,
-    required String count,
-    bool highlight = false,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: highlight ? const Color(0xFFEef2ff) : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.circle, size: 10, color: dotColor),
-          const SizedBox(width: 12),
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFF0B132B),
-            ),
-          ),
-          const Spacer(),
-          Text(
-            count,
-            style: GoogleFonts.playfairDisplay(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF0B132B),
-            ),
-          ),
-        ],
-      ),
-    );
+  void _navigateToUpload(String category) {
+    if (category == "Domestic Violence") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const DomesticViolenceFlowScreen(),
+        ),
+      );
+    } else if (category == "Land Dispute") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const LandFraudFlowScreen(),
+        ),
+      );
+    } else if (category == "Cyber Crime") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const CyberCrimeFlowScreen(),
+        ),
+      );
+    } else if (category == "Traffic Issue" || category == "Accident Claim") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const TrafficIssueFlowScreen(),
+        ),
+      );
+    } else if (category == "Women Safety") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const WomenSafetyFlowScreen(),
+        ),
+      );
+    } else if (category == "Employee Rights") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const EmployeeRightsFlowScreen(),
+        ),
+      );
+    } else if (category == "Tenant Issue") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const TenantIssueFlowScreen(),
+        ),
+      );
+    } else if (category == "Consumer Complaint") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ConsumerComplaintFlowScreen(),
+        ),
+      );
+    } else if (category == "Student Issues") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const StudentIssueFlowScreen(),
+        ),
+      );
+    } else if (category == "Accident Claim") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const AccidentClaimFlowScreen(),
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => UploadDocumentsScreen(category: category),
+        ),
+      );
+    }
   }
 
   @override
@@ -274,14 +243,10 @@ class _ClientHomePageState extends State<ClientHomePage> {
               // Top App Bar
               Row(
                 children: [
-                  const Icon(
-                    Icons.account_balance,
-                    color: Color(0xFF0B132B),
-                    size: 18,
-                  ),
+                  const Icon(Icons.account_balance, color: Color(0xFF0B132B), size: 18),
                   const SizedBox(width: 8),
                   Text(
-                    "LexisCore AI",
+                    "LexAssist",
                     style: GoogleFonts.playfairDisplay(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -289,338 +254,263 @@ class _ClientHomePageState extends State<ClientHomePage> {
                     ),
                   ),
                   const Spacer(),
-                  const Icon(
-                    Icons.security,
-                    color: Color(0xFF0B132B),
-                    size: 20,
+                  PopupMenuButton<String>(
+                    onSelected: (value) async {
+                      if (value == 'logout') {
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.clear();
+                        if (context.mounted) {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (_) => const SignInScreen()),
+                            (route) => false,
+                          );
+                        }
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'logout',
+                        child: Row(
+                          children: [
+                            Icon(Icons.logout, color: Colors.red),
+                            SizedBox(width: 8),
+                            Text("Logout", style: TextStyle(color: Colors.red)),
+                          ],
+                        ),
+                      ),
+                    ],
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: const CircleAvatar(
+                        radius: 16,
+                        backgroundColor: Color(0xFFEAF0FF),
+                        child: Icon(Icons.person, size: 18, color: Color(0xFF0B132B)),
+                      ),
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 24),
 
               // Greeting
               Text(
-                "Good morning,\n$userName",
+                "$_greeting, $userName!",
                 style: GoogleFonts.playfairDisplay(
-                  fontSize: 36,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: const Color(0xFF0B132B),
-                  height: 1.1,
                 ),
               ),
-              const SizedBox(height: 14),
-
-              // Subtitle
+              const SizedBox(height: 6),
               Text(
-                "Your legal landscape is evolving. Here is the latest intelligence regarding your active matters and document progress.",
+                "How can we help you legally today?",
                 style: GoogleFonts.inter(
                   fontSize: 14,
-                  color: Colors.black87,
-                  height: 1.5,
+                  color: Colors.black54,
+                ),
+              ),
+              const SizedBox(height: 24),
+              
+
+              // Search Bar
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade200),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.02),
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: TextField(
+                  onChanged: (value) {
+                    setState(() {
+                      searchQuery = value;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    hintText: "Search legal issues, categories...",
+                    hintStyle: GoogleFonts.inter(color: Colors.grey.shade400, fontSize: 14),
+                    border: InputBorder.none,
+                    icon: const Icon(Icons.search, color: Colors.grey),
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
 
-              // AI Strategic Insight Card
-              Container(
-                padding: const EdgeInsets.all(22),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF07142A),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
-                    )
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.auto_awesome,
-                          color: Color(0xFFD4AF37),
-                          size: 16,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          "AI STRATEGIC INSIGHT",
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1.2,
-                            color: const Color(0xFFD4AF37),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      "Regulatory shift may impact Case #2024-88",
-                      style: GoogleFonts.playfairDisplay(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        height: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      "LexisCore AI has detected a recent appellate ruling in the 9th Circuit that mirrors your current dispute with Global Logistics. This precedent strengthens our argument regarding section 4.2 of your service agreement.",
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        color: Colors.white.withOpacity(0.8),
-                        height: 1.6,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF8A6A00),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            "Review Precedent",
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          const Icon(
-                            Icons.arrow_forward,
-                            color: Colors.white,
-                            size: 14,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 30),
-
-              // Case Status
-              Text(
-                "Case Status",
-                style: GoogleFonts.playfairDisplay(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF0B132B),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade100),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
-                      blurRadius: 8,
-                    )
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    caseStatusRow(
-                      dotColor: const Color(0xFF8A6A00),
-                      label: "Active Matters",
-                      count: "03",
-                      highlight: true,
-                    ),
-                    caseStatusRow(
-                      dotColor: Colors.grey,
-                      label: "Pending Review",
-                      count: "08",
-                    ),
-                    caseStatusRow(
-                      dotColor: Colors.grey.shade300,
-                      label: "Closed Files",
-                      count: "42",
-                    ),
-                    const SizedBox(height: 12),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const MyCasesScreen()),
-                        );
-                      },
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: Text(
-                            "View Complete Portfolio  ›",
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFF8A6A00),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 30),
-
-              // Quick Actions
-              Text(
-                "Quick Actions",
-                style: GoogleFonts.playfairDisplay(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF0B132B),
-                ),
-              ),
-              const SizedBox(height: 16),
-              quickActionCard(
-                icon: Icons.chat_bubble,
-                iconColor: const Color(0xFF0B132B),
-                title: "Ask AI Assistant",
-                subtitle: "Draft queries or analyze clauses",
-                bgColor: const Color(0xFFEef2ff),
+              // AI Assistant Banner
+              GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const AIChatScreen()),
                   );
                 },
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF0B132B), Color(0xFF1C2C54)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF0B132B).withOpacity(0.3),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.auto_awesome, color: Color(0xFFD4AF37), size: 24),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Lexis AI Assistant",
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              "Get instant legal guidance & document analysis.",
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: Colors.white70,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 16),
+                    ],
+                  ),
+                ),
               ),
-              quickActionCard(
-                icon: Icons.note_add_rounded,
-                iconColor: const Color(0xFF8A6A00),
-                title: "Upload Document",
-                subtitle: "Securely ingest new evidence",
-                bgColor: Colors.white,
-                hasBorder: true,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const UploadDocumentsScreen()),
-                  );
-                },
-              ),
-              quickActionCard(
-                icon: Icons.calendar_today,
-                iconColor: Colors.grey.shade600,
-                title: "Schedule Meeting",
-                subtitle: "Connect with your counsel",
-                bgColor: Colors.white,
-                hasBorder: true,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const AppointmentsScreen()),
-                  );
-                },
-              ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 32),
 
-              // Recent Activity
-              Row(
-                children: [
-                  Text(
-                    "Recent\nActivity",
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF0B132B),
-                      height: 1.1,
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEef2ff),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.lock,
-                          size: 10,
-                          color: Color(0xFF3B5998),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          "ENCRYPTED\nFEED",
+              // Categories Header
+              Text(
+                "Legal Categories",
+                style: GoogleFonts.playfairDisplay(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0B132B),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Category Grid
+              Builder(
+                builder: (context) {
+                  final filteredCategories = categories
+                      .where((cat) => cat["name"]
+                          .toString()
+                          .toLowerCase()
+                          .contains(searchQuery.toLowerCase()))
+                      .toList();
+
+                  if (filteredCategories.isEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40),
+                      child: Center(
+                        child: Text(
+                          "No categories found",
                           style: GoogleFonts.inter(
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF3B5998),
-                            letterSpacing: 0.5,
-                          ),
+                              color: Colors.black54, fontSize: 14),
                         ),
-                      ],
+                      ),
+                    );
+                  }
+
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: 1.1,
                     ),
-                  ),
-                ],
+                    itemCount: filteredCategories.length,
+                    itemBuilder: (context, index) {
+                      final cat = filteredCategories[index];
+                  return GestureDetector(
+                    onTap: () => _navigateToUpload(cat["name"]),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.grey.shade100),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.03),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: (cat["color"] as Color).withOpacity(0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              cat["icon"] as IconData,
+                              color: cat["color"] as Color,
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            cat["name"],
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF0B132B),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                  );
+                },
               ),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade100),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
-                      blurRadius: 8,
-                    )
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    activityListTile(
-                      icon: Icons.description,
-                      iconBg: const Color(0xFFEef2ff),
-                      iconColor: const Color(0xFF3B5998),
-                      titleText: "Updated draft:\n",
-                      titleBold: "Shareholder_Agreement_v4.pdf",
-                      subtitle: "Modified by LexisCore AI • 2 hours ago",
-                    ),
-                    activityListTile(
-                      icon: Icons.gavel,
-                      iconBg: const Color(0xFFFFF4E5),
-                      iconColor: const Color(0xFFD48806),
-                      titleText: "New court filing detected:\n",
-                      titleBold: "Case #2024-LH-992",
-                      subtitle: "Superior Court Registry • 5 hours ago",
-                    ),
-                    activityListTile(
-                      icon: Icons.forum,
-                      iconBg: const Color(0xFFF4F6FB),
-                      iconColor: const Color(0xFF5A6679),
-                      titleText: "Meeting Recap available:\n",
-                      titleBold: "Discovery Review with Arthur Pierce",
-                      subtitle: "Meeting AI Transcript • Yesterday",
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 80), // Fab spacing
+              const SizedBox(height: 80),
             ],
           ),
         ),
@@ -712,23 +602,33 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
               children: [
                 Row(
                   children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF0B132B),
+                    Flexible(
+                      child: Text(
+                        title,
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF0B132B),
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     if (hasActiveBadge) ...[
                       const SizedBox(width: 8),
-                      Text(
-                        "ACTIVE",
-                        style: GoogleFonts.inter(
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFFD4AF37),
-                          letterSpacing: 1,
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF8E1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          "ACTIVE",
+                          style: GoogleFonts.inter(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFFD4AF37),
+                            letterSpacing: 1,
+                          ),
                         ),
                       ),
                     ],
@@ -775,17 +675,44 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
                       ),
                     ),
                     const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: const CircleAvatar(
-                        radius: 12,
-                        backgroundColor: Color(0xFFEAF0FF),
-                        child: Icon(Icons.person, size: 14, color: Color(0xFF0B132B)),
+                    PopupMenuButton<String>(
+                      onSelected: (value) async {
+                        if (value == 'logout') {
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.clear();
+                          if (context.mounted) {
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(builder: (_) => const SignInScreen()),
+                              (route) => false,
+                            );
+                          }
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'logout',
+                          child: Row(
+                            children: [
+                              Icon(Icons.logout, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text("Logout", style: TextStyle(color: Colors.red)),
+                            ],
+                          ),
+                        ),
+                      ],
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: const CircleAvatar(
+                          radius: 12,
+                          backgroundColor: Color(0xFFEAF0FF),
+                          child: Icon(Icons.person, size: 14, color: Color(0xFF0B132B)),
+                        ),
                       ),
                     ),
                   ],

@@ -1,0 +1,105 @@
+{
+  "info": {
+    "name": "LexAssist API Tests",
+    "description": "Postman collection to test the Flask backend APIs for the Smart Legal Assistant.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:5000/",
+          "protocol": "http",
+          "host": ["127", "0", "0", "1"],
+          "port": "5000",
+          "path": [""]
+        }
+      }
+    },
+    {
+      "name": "2. AI Legal Assistant Chat",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"message\": \"What are my rights regarding domestic violence under Section 498A?\",\n    \"history\": []\n}"
+        },
+        "url": {
+          "raw": "http://127.0.0.1:5000/ai-chat",
+          "protocol": "http",
+          "host": ["127", "0", "0", "1"],
+          "port": "5000",
+          "path": ["ai-chat"]
+        }
+      }
+    },
+    {
+      "name": "3. Submit Domestic Violence Complaint",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "email",
+              "value": "test.user@example.com",
+              "type": "text"
+            },
+            {
+              "key": "description",
+              "value": "I am reporting continuous physical and emotional abuse at my residence. I need immediate assistance.",
+              "type": "text"
+            },
+            {
+              "key": "latitude",
+              "value": "28.6139",
+              "type": "text"
+            },
+            {
+              "key": "longitude",
+              "value": "77.2090",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:5000/submit-dv-complaint",
+          "protocol": "http",
+          "host": ["127", "0", "0", "1"],
+          "port": "5000",
+          "path": ["submit-dv-complaint"]
+        }
+      }
+    },
+    {
+      "name": "4. Get My Cases",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:5000/get-my-cases?email=test.user@example.com",
+          "protocol": "http",
+          "host": ["127", "0", "0", "1"],
+          "port": "5000",
+          "path": ["get-my-cases"],
+          "query": [
+            {
+              "key": "email",
+              "value": "test.user@example.com"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

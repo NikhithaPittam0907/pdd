@@ -1,0 +1,8 @@
+flask
+flask-cors
+Flask-SQLAlchemy
+pymysql
+python-dotenv
+PyPDF2
+python-docx
+google-genai

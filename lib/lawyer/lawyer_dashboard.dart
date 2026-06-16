@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../screens/signin_screen.dart';
 import 'assigned_cases.dart';
 import 'case_analysis.dart';
 import 'court_prep.dart';
 import 'document_draft.dart';
 import 'hearings.dart';
+import 'lawyer_appointments.dart';
 import 'legal_research.dart';
 import 'strategy.dart';
 
@@ -23,6 +26,7 @@ class _LawyerDashboardState
   final List<Widget> pages = const [
     LawyerHome(),
     AssignedCasesScreen(),
+    LawyerAppointmentsScreen(),
     LegalResearchScreen(),
     HearingsScreen(),
     LawyerProfilePage(),
@@ -63,6 +67,10 @@ class _LawyerDashboardState
           BottomNavigationBarItem(
             icon: Icon(Icons.folder),
             label: "Cases",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month),
+            label: "Appointments",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.search),
@@ -245,14 +253,38 @@ class LawyerHome extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  const CircleAvatar(
-                    backgroundColor:
-                        Color(
-                            0xFFEAF0FF),
-                    child: Icon(
-                      Icons.person,
-                      color: Color(
-                          0xFF0B132B),
+                  PopupMenuButton<String>(
+                    onSelected: (value) async {
+                      if (value == 'logout') {
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.clear();
+                        if (context.mounted) {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (_) => const SignInScreen()),
+                            (route) => false,
+                          );
+                        }
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'logout',
+                        child: Row(
+                          children: [
+                            Icon(Icons.logout, color: Colors.red),
+                            SizedBox(width: 8),
+                            Text("Logout", style: TextStyle(color: Colors.red)),
+                          ],
+                        ),
+                      ),
+                    ],
+                    child: const CircleAvatar(
+                      backgroundColor: Color(0xFFEAF0FF),
+                      child: Icon(
+                        Icons.person,
+                        color: Color(0xFF0B132B),
+                      ),
                     ),
                   ),
                 ],
@@ -374,10 +406,32 @@ class LawyerHome extends StatelessWidget {
   }
 }
 
-class LawyerProfilePage
-    extends StatelessWidget {
-  const LawyerProfilePage(
-      {super.key});
+class LawyerProfilePage extends StatefulWidget {
+  const LawyerProfilePage({super.key});
+
+  @override
+  State<LawyerProfilePage> createState() => _LawyerProfilePageState();
+}
+
+class _LawyerProfilePageState extends State<LawyerProfilePage> {
+  String lawyerName = "Adv. Rahul Sharma";
+  String lawyerEmail = "lawyer@email.com";
+  String lawyerPhone = "+91 9876543210";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      lawyerName = prefs.getString('name') ?? "Adv. Rahul Sharma";
+      lawyerEmail = prefs.getString('email') ?? "lawyer@email.com";
+      lawyerPhone = prefs.getString('phone') ?? "+91 9876543210";
+    });
+  }
 
   Widget infoTile(
     IconData icon,
@@ -385,16 +439,11 @@ class LawyerProfilePage
     String value,
   ) {
     return Container(
-      margin:
-          const EdgeInsets.only(
-              bottom: 14),
-      padding:
-          const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-            BorderRadius.circular(
-                16),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: const [
           BoxShadow(
             color: Colors.black12,
@@ -406,44 +455,31 @@ class LawyerProfilePage
         children: [
           CircleAvatar(
             radius: 22,
-            backgroundColor:
-                const Color(
-                    0xFFEAF0FF),
+            backgroundColor: const Color(0xFFEAF0FF),
             child: Icon(
               icon,
-              color: const Color(
-                  0xFF0B132B),
+              color: const Color(0xFF0B132B),
             ),
           ),
-          const SizedBox(
-              width: 14),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment
-                      .start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style:
-                      GoogleFonts.inter(
+                  style: GoogleFonts.inter(
                     fontSize: 12,
-                    color: Colors
-                        .black54,
+                    color: Colors.black54,
                   ),
                 ),
-                const SizedBox(
-                    height: 4),
+                const SizedBox(height: 4),
                 Text(
                   value,
-                  style:
-                      GoogleFonts.playfairDisplay(
+                  style: GoogleFonts.playfairDisplay(
                     fontSize: 18,
-                    fontWeight:
-                        FontWeight
-                            .bold,
-                    color: const Color(
-                        0xFF0B132B),
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF0B132B),
                   ),
                 ),
               ],
@@ -455,65 +491,50 @@ class LawyerProfilePage
   }
 
   @override
-  Widget build(
-      BuildContext context) {
+  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          const Color(0xFFF4F6FB),
+      backgroundColor: const Color(0xFFF4F6FB),
       body: SafeArea(
-        child:
-            SingleChildScrollView(
-          padding:
-              const EdgeInsets.all(
-                  20),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
           child: Column(
             children: [
               const CircleAvatar(
                 radius: 50,
-                backgroundColor:
-                    Color(0xFFEAF0FF),
+                backgroundColor: Color(0xFFEAF0FF),
                 child: Icon(
                   Icons.person,
                   size: 50,
-                  color: Color(
-                      0xFF0B132B),
+                  color: Color(0xFF0B132B),
                 ),
               ),
-              const SizedBox(
-                  height: 18),
+              const SizedBox(height: 18),
               Text(
-                "Adv. Rahul Sharma",
-                style:
-                    GoogleFonts.playfairDisplay(
+                lawyerName,
+                style: GoogleFonts.playfairDisplay(
                   fontSize: 28,
-                  fontWeight:
-                      FontWeight.bold,
-                  color: const Color(
-                      0xFF0B132B),
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0B132B),
                 ),
               ),
-              const SizedBox(
-                  height: 6),
+              const SizedBox(height: 6),
               Text(
                 "Senior Legal Consultant",
-                style:
-                    GoogleFonts.inter(
+                style: GoogleFonts.inter(
                   fontSize: 14,
-                  color:
-                      Colors.black54,
+                  color: Colors.black54,
                 ),
               ),
-              const SizedBox(
-                  height: 24),
+              const SizedBox(height: 24),
               infoTile(
                 Icons.email,
                 "Email",
-                "lawyer@email.com",
+                lawyerEmail,
               ),
               infoTile(
                 Icons.phone,
                 "Phone",
-                "+91 9876543210",
+                lawyerPhone,
               ),
               infoTile(
                 Icons.gavel,
@@ -524,6 +545,39 @@ class LawyerProfilePage
                 Icons.folder,
                 "Handled Cases",
                 "128 Cases",
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.clear();
+                    if (context.mounted) {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (_) => const SignInScreen()),
+                        (route) => false,
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.logout, color: Colors.white),
+                  label: Text(
+                    "LOGOUT",
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red.shade700,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),

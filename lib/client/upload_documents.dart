@@ -1,8 +1,101 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
+import 'ai_chat.dart';
 
-class UploadDocumentsScreen extends StatelessWidget {
-  const UploadDocumentsScreen({super.key});
+class UploadDocumentsScreen extends StatefulWidget {
+  final String? category;
+  const UploadDocumentsScreen({super.key, this.category});
+
+  @override
+  State<UploadDocumentsScreen> createState() => _UploadDocumentsScreenState();
+}
+
+class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
+  String? selectedCategory;
+  PlatformFile? selectedFile;
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedCategory = widget.category ?? "Affidavit";
+  }
+
+  Future<void> pickFile() async {
+    FilePickerResult? result = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'docx'],
+    );
+
+    if (result != null) {
+      setState(() {
+        selectedFile = result.files.first;
+      });
+    }
+  }
+
+  Future<void> uploadAndAnalyze() async {
+    if (selectedFile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please select a file first")),
+      );
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse("${ApiConfig.baseUrl}/extract-text"),
+      );
+
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'file',
+          selectedFile!.path!,
+        ),
+      );
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        if (!mounted) return;
+        
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AIChatScreen(analysisData: data),
+          ),
+        );
+      } else {
+        final Map<String, dynamic> errorData = jsonDecode(response.body);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorData['message'] ?? "Error analyzing document")),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Connection Error: $e")),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,57 +205,73 @@ class UploadDocumentsScreen extends StatelessWidget {
               spacing: 12,
               runSpacing: 12,
               children: [
-                categoryChip("Affidavit", true),
-                categoryChip("Evidence", false),
-                categoryChip("Contract", false),
-                categoryChip("Pleading", false),
+                if (widget.category != null && !["Affidavit", "Evidence", "Contract", "Pleading"].contains(widget.category))
+                  categoryChip(widget.category!, selectedCategory == widget.category),
+                categoryChip("Affidavit", selectedCategory == "Affidavit"),
+                categoryChip("Evidence", selectedCategory == "Evidence"),
+                categoryChip("Contract", selectedCategory == "Contract"),
+                categoryChip("Pleading", selectedCategory == "Pleading"),
               ],
             ),
 
             const SizedBox(height: 32),
 
             // UPLOAD ZONE
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 60),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade200, width: 1),
-                // Custom dotted border would be better but simple border is fine for now
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF0F4FF),
-                      borderRadius: BorderRadius.circular(12),
+            GestureDetector(
+              onTap: pickFile,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 60),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: selectedFile != null ? const Color(0xFF0B132B) : Colors.grey.shade200,
+                    width: selectedFile != null ? 2 : 1,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0F4FF),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        selectedFile != null ? Icons.check_circle : Icons.cloud_upload,
+                        color: const Color(0xFF0B132B),
+                        size: 32,
+                      ),
                     ),
-                    child: const Icon(Icons.cloud_upload, color: Color(0xFF0B132B), size: 32),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    "Tap to select files",
-                    style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: const Color(0xFF0B132B)),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "or drag & drop files here",
-                    style: GoogleFonts.inter(fontSize: 14, color: Colors.black54),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      formatIcon(Icons.description, "PDF"),
-                      const SizedBox(width: 16),
-                      formatIcon(Icons.description, "DOCX"),
-                      const SizedBox(width: 16),
-                      formatIcon(Icons.image, "JPG"),
-                    ],
-                  ),
-                ],
+                    const SizedBox(height: 20),
+                    Text(
+                      selectedFile != null ? selectedFile!.name : "Tap to select files",
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF0B132B),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      selectedFile != null ? "${(selectedFile!.size / 1024).toStringAsFixed(2)} KB" : "or drag & drop files here",
+                      style: GoogleFonts.inter(fontSize: 14, color: Colors.black54),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        formatIcon(Icons.description, "PDF"),
+                        const SizedBox(width: 16),
+                        formatIcon(Icons.description, "DOCX"),
+                        const SizedBox(width: 16),
+                        formatIcon(Icons.image, "JPG"),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
 
@@ -227,41 +336,53 @@ class UploadDocumentsScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade100),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(color: Colors.red.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-                    child: const Icon(Icons.picture_as_pdf, color: Colors.red, size: 20),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Evidence_v1.pdf",
-                          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF0B132B)),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "2.4 MB • Ready",
-                          style: GoogleFonts.inter(fontSize: 12, color: Colors.black45),
-                        ),
-                      ],
+            if (selectedFile != null)
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade100),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(color: Colors.red.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                      child: Icon(
+                        selectedFile!.name.toLowerCase().endsWith(".pdf") ? Icons.picture_as_pdf : Icons.description,
+                        color: Colors.red,
+                        size: 20,
+                      ),
                     ),
-                  ),
-                  const Icon(Icons.delete_outline, color: Colors.black45),
-                ],
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            selectedFile!.name,
+                            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF0B132B)),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "${(selectedFile!.size / 1024).toStringAsFixed(2)} KB • Ready",
+                            style: GoogleFonts.inter(fontSize: 12, color: Colors.black45),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, color: Colors.black45),
+                      onPressed: () {
+                        setState(() {
+                          selectedFile = null;
+                        });
+                      },
+                    ),
+                  ],
+                ),
               ),
-            ),
 
             const SizedBox(height: 40),
 
@@ -275,10 +396,16 @@ class UploadDocumentsScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   elevation: 4,
                 ),
-                onPressed: () {},
-                icon: const Icon(Icons.lock, color: Colors.white, size: 18),
+                onPressed: isLoading ? null : uploadAndAnalyze,
+                icon: isLoading
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      )
+                    : const Icon(Icons.lock, color: Colors.white, size: 18),
                 label: Text(
-                  "Securely Upload",
+                  isLoading ? "Analyzing Case..." : "Securely Upload & Analyze",
                   style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
               ),
@@ -310,19 +437,26 @@ class UploadDocumentsScreen extends StatelessWidget {
   }
 
   Widget categoryChip(String label, bool isSelected) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFF0B132B) : Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: isSelected ? null : Border.all(color: Colors.grey.shade200),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.inter(
-          fontSize: 13,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-          color: isSelected ? Colors.white : const Color(0xFF0B132B),
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedCategory = label;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF0B132B) : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: isSelected ? null : Border.all(color: Colors.grey.shade200),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+            color: isSelected ? Colors.white : const Color(0xFF0B132B),
+          ),
         ),
       ),
     );

@@ -1,7 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'signin_screen.dart';
+import '../client/client_dashboard.dart';
+import '../lawyer/lawyer_dashboard.dart';
+import '../police/police_dashboard.dart';
+import '../admin/admin_dashboard.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,13 +19,47 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    _checkSession();
+  }
 
-    Timer(const Duration(seconds: 2), () {
+  Future<void> _checkSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? email = prefs.getString('email');
+    final String? role = prefs.getString('role');
+
+    // Show splash screen for at least 2 seconds
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (!mounted) return;
+
+    if (email != null && email.isNotEmpty && role != null && role.isNotEmpty) {
+      if (role == 'lawyer') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LawyerDashboard()),
+        );
+      } else if (role == 'police') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const PoliceDashboard()),
+        );
+      } else if (role == 'admin') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const AdminDashboard()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const ClientDashboard()),
+        );
+      }
+    } else {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const SignInScreen()),
       );
-    });
+    }
   }
 
   @override

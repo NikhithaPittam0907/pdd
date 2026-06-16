@@ -2,11 +2,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
 import 'forgot_password.dart';
 import 'signup_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../client/client_dashboard.dart';
 import '../lawyer/lawyer_dashboard.dart';
+import '../police/police_dashboard.dart';
+import '../admin/admin_dashboard.dart';
 import '../config/api_config.dart';
 
 class SignInScreen extends StatefulWidget {
@@ -55,11 +58,15 @@ class _SignInScreenState extends State<SignInScreen> {
             context,
             MaterialPageRoute(builder: (_) => const LawyerDashboard()),
           );
-        } else if (data['role'] == 'admin') {
-          // If you have an admin dashboard, route here. Defaulting to Client for now.
+        } else if (data['role'] == 'police') {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (_) => const ClientDashboard()),
+            MaterialPageRoute(builder: (_) => const PoliceDashboard()),
+          );
+        } else if (data['role'] == 'admin') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const AdminDashboard()),
           );
         } else {
           Navigator.pushReplacement(
@@ -67,6 +74,9 @@ class _SignInScreenState extends State<SignInScreen> {
             MaterialPageRoute(builder: (_) => const ClientDashboard()),
           );
         }
+
+        // Trigger the "Save Password" prompt
+        TextInput.finishAutofillContext();
       } else {
         ScaffoldMessenger.of(
           context,
@@ -86,6 +96,7 @@ class _SignInScreenState extends State<SignInScreen> {
     required String hint,
     required TextEditingController controller,
     bool isPassword = false,
+    Iterable<String>? autofillHints,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,6 +113,8 @@ class _SignInScreenState extends State<SignInScreen> {
         TextField(
           controller: controller,
           obscureText: isPassword ? obscure : false,
+          autofillHints: autofillHints,
+          keyboardType: isPassword ? TextInputType.visiblePassword : TextInputType.emailAddress,
           style: GoogleFonts.inter(fontSize: 15),
           decoration: InputDecoration(
             hintText: hint,
@@ -180,8 +193,9 @@ class _SignInScreenState extends State<SignInScreen> {
                       BoxShadow(color: Colors.black12, blurRadius: 8),
                     ],
                   ),
-                  child: Column(
-                    children: [
+                  child: AutofillGroup(
+                    child: Column(
+                      children: [
                       Text(
                         "LexisCore Login",
                         style: GoogleFonts.playfairDisplay(
@@ -209,6 +223,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         label: "Email Address",
                         hint: "attorney@firm.com",
                         controller: emailController,
+                        autofillHints: const [AutofillHints.email],
                       ),
 
                       const SizedBox(height: 22),
@@ -252,6 +267,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         hint: "••••••••",
                         controller: passwordController,
                         isPassword: true,
+                        autofillHints: const [AutofillHints.password],
                       ),
 
                       const SizedBox(height: 10),
@@ -307,33 +323,36 @@ class _SignInScreenState extends State<SignInScreen> {
                       const Divider(),
                       const SizedBox(height: 18),
 
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEAF0FF),
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.verified,
-                              color: Color(0xFF8A6A00),
-                              size: 18,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              "256-bit AES Encryption Active",
-                              style: GoogleFonts.inter(
-                                color: const Color(0xFF8A6A00),
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEAF0FF),
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.verified,
+                                color: Color(0xFF8A6A00),
+                                size: 18,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 8),
+                              Text(
+                                "256-bit AES Encryption Active",
+                                style: GoogleFonts.inter(
+                                  color: const Color(0xFF8A6A00),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
 
@@ -362,6 +381,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
               ),
             ),
+          ),
 
             Container(
               width: double.infinity,
