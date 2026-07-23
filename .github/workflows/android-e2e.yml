@@ -60,6 +60,8 @@ jobs:
 
       # Stage 5: Build APK
       - name: Build Android APK
+        env:
+          KOTLIN_HOME: ""
         run: |
           flutter clean
           flutter pub get
