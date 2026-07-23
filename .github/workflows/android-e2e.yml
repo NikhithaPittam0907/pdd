@@ -61,7 +61,9 @@ jobs:
       # Stage 5: Build APK
       - name: Build Android APK
         run: |
-          flutter build apk --debug
+          flutter clean
+          flutter pub get
+          flutter build apk --debug -v
 
       # Stage 6, 7 & 8: Start Emulator, Verify Readiness, and Install APK
       # We combine these utilizing reactivecircus/android-emulator-runner for hardware acceleration
