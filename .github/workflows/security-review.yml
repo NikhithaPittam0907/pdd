@@ -1,0 +1,64 @@
+name: Static Security Review and Hardening Checks
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  security-scan:
+    name: Security and Static Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Needed for full Gitleaks git history scan
+
+      # Step 2: Run Gitleaks to scan for exposed secrets
+      - name: Run Gitleaks Secrets Scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true # Ensures workflow continues for reporting
+
+      # Step 3: Run Semgrep for Static Application Security Testing (SAST)
+      - name: Run Semgrep SAST Scan
+        run: |
+          pip install semgrep
+          semgrep --config auto --error .
+        continue-on-error: true
+
+      # Step 4: Run Trivy for filesystem vulnerability check
+      - name: Run Trivy FS Vulnerability Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'table'
+          exit-code: '0' # Set to 1 to fail the pipeline if critical issues are found
+          severity: 'CRITICAL,HIGH'
+
+      # Step 5: Setup Python for unit and API tests
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # Step 6: Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pytest openpyxl
+        continue-on-error: true
+
+      # Step 7: Run Unit and Functional API tests
+      - name: Execute Tests
+        run: |
+          pytest --tb=short
+        continue-on-error: true

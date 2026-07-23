@@ -48,3 +48,14 @@ android/gradle/wrapper/dists/
 build/
 .dart_tool/
 backend/.env
+backend/uploads/
+
+# Test Automation
+/automation/reports/
+/automation/screenshots/
+/automation/logs/
+/automation/data/test_cases.json
+/Test Results/
+/gh-pages-stage/
+.pytest_cache/
+
