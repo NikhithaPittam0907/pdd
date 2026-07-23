@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   deploy-and-test:
-    runs-on: macos-13 # Virtualization-capable runner for Chrome headlessness if needed
+    runs-on: ubuntu-latest
 
     steps:
       # Stage 1: Repository Checkout

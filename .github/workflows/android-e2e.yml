@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   e2e-test:
-    runs-on: macos-13 # Standard macOS runner with nested virtualization for Android Emulator acceleration
+    runs-on: macos-latest
 
     steps:
       # Stage 1: Checkout Repository
