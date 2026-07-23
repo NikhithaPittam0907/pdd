@@ -117,6 +117,10 @@ def pytest_sessionfinish(session, exitstatus):
     # 5. Generate Markdown Summary
     generate_markdown_summary(run_results, summary_dir)
     generate_markdown_summary(run_results, tr_summary)
+    
+    # 6. Generate Executive Board
+    from automation.utils.generate_executive_board import generate_board
+    generate_board()
 
 def generate_markdown_summary(results, summary_dir):
     total = len(results)
