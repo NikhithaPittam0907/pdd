@@ -68,11 +68,13 @@ class _ClientDashboardState extends State<ClientDashboard> {
         backgroundColor: Colors.white,
         selectedItemColor: const Color(0xFF001A3A),
         unselectedItemColor: Colors.grey,
+        selectedFontSize: 10,
+        unselectedFontSize: 10,
         selectedLabelStyle: GoogleFonts.inter(
           fontWeight: FontWeight.w600,
-          fontSize: 11,
+          fontSize: 10,
         ),
-        unselectedLabelStyle: GoogleFonts.inter(fontSize: 11),
+        unselectedLabelStyle: GoogleFonts.inter(fontSize: 10),
         onTap: (index) {
           setState(() {
             currentIndex = index;

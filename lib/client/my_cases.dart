@@ -187,9 +187,22 @@ class _MyCasesScreenState extends State<MyCasesScreen> {
                           child: Text(risk, style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: riskColor)),
                         ),
                         const SizedBox(width: 8),
-                        Text(caseId, style: GoogleFonts.inter(fontSize: 10, color: Colors.black45)),
-                        const Spacer(),
-                        Text(caseData['status'] ?? 'Submitted', style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.blue)),
+                        Flexible(
+                          child: Text(
+                            caseId,
+                            style: GoogleFonts.inter(fontSize: 10, color: Colors.black45),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            caseData['status'] ?? 'Submitted',
+                            style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.blue),
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.right,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 12),

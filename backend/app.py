@@ -116,10 +116,10 @@ with app.app_context():
     db.session.commit()
 
 # AI Config
-gemini_api_key = os.getenv("GEMINI_API_KEY")
-if not gemini_api_key or gemini_api_key == "YOUR_API_KEY_HERE" or gemini_api_key.startswith("AIzaSyDuo5"):
-    gemini_api_key = os.getenv("GOOGLE_API_KEY") or gemini_api_key
-ai_client = genai.Client(api_key=gemini_api_key) if gemini_api_key and gemini_api_key != "YOUR_API_KEY_HERE" else None
+gemini_api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+if gemini_api_key == "YOUR_API_KEY_HERE":
+    gemini_api_key = None
+ai_client = genai.Client(api_key=gemini_api_key) if gemini_api_key else None
 
 # ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -413,7 +413,7 @@ def ai_chat():
         
         # Using the chat session for better context handling
         chat = ai_client.chats.create(
-            model="gemini-3-flash-preview",
+            model="gemini-2.5-flash",
             history=gemini_history,
             config=types.GenerateContentConfig(
                 system_instruction=system_prompt,
@@ -576,7 +576,7 @@ def submit_land_fraud():
         if ai_client:
             prompt = f"Analyze this land fraud case: {request.form.get('description')}\nExtracted text: {extracted_text}\nReturn JSON with keys: risk_level, risk_summary, case_summary, how_risk_analysis_calculated, extracted_info (ownership_name, survey_number, registration_date), government_record_name, warnings, legal_actions, fir_draft"
             try:
-                res = ai_client.models.generate_content(model="gemini-3-flash-preview", contents=prompt)
+                res = ai_client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
                 txt = res.text.strip()
                 if "```json" in txt: txt = txt.split("```json")[1].split("```")[0]
                 analysis = json.loads(txt)
@@ -648,7 +648,7 @@ def submit_cyber_crime():
             Ensure the recommendations are specific to the evidence found.
             """
             try:
-                res = ai_client.models.generate_content(model="gemini-3-flash-preview", contents=prompt)
+                res = ai_client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
                 txt = res.text.strip()
                 if "```json" in txt: txt = txt.split("```json")[1].split("```")[0]
                 analysis = json.loads(txt)
@@ -738,7 +738,7 @@ def submit_traffic_issue():
             Ensure the legal document is comprehensive and ready for submission.
             """
             try:
-                res = ai_client.models.generate_content(model="gemini-3-flash-preview", contents=prompt)
+                res = ai_client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
                 txt = res.text.strip()
                 if "```json" in txt: txt = txt.split("```json")[1].split("```")[0]
                 analysis = json.loads(txt)
@@ -815,7 +815,7 @@ def submit_women_safety_report():
             - rights_info (summary of legal rights in this context)
             """
             try:
-                res = ai_client.models.generate_content(model="gemini-3-flash-preview", contents=prompt)
+                res = ai_client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
                 txt = res.text.strip()
                 if "```json" in txt: txt = txt.split("```json")[1].split("```")[0]
                 analysis = json.loads(txt)
@@ -902,7 +902,7 @@ def submit_employee_right_case():
             Ensure the legal notice is comprehensive and tailored to the employee's specific situation.
             """
             try:
-                res = ai_client.models.generate_content(model="gemini-3-flash-preview", contents=prompt)
+                res = ai_client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
                 txt = res.text.strip()
                 if "```json" in txt: txt = txt.split("```json")[1].split("```")[0]
                 analysis = json.loads(txt)
@@ -992,7 +992,7 @@ def submit_tenant_issue():
             Ensure the legal notice is comprehensive and tailored to the tenant's specific situation.
             """
             try:
-                res = ai_client.models.generate_content(model="gemini-3-flash-preview", contents=prompt)
+                res = ai_client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
                 txt = res.text.strip()
                 if "```json" in txt: txt = txt.split("```json")[1].split("```")[0]
                 analysis = json.loads(txt)
@@ -1082,7 +1082,7 @@ def submit_consumer_complaint():
             Ensure the legal document is comprehensive and ready for submission.
             """
             try:
-                res = ai_client.models.generate_content(model="gemini-3-flash-preview", contents=prompt)
+                res = ai_client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
                 txt = res.text.strip()
                 if "```json" in txt: txt = txt.split("```json")[1].split("```")[0]
                 analysis = json.loads(txt)
@@ -1168,7 +1168,7 @@ def submit_student_issue():
             Ensure the legal document is comprehensive and tailored to the student's specific situation.
             """
             try:
-                res = ai_client.models.generate_content(model="gemini-3-flash-preview", contents=prompt)
+                res = ai_client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
                 txt = res.text.strip()
                 if "```json" in txt: txt = txt.split("```json")[1].split("```")[0]
                 analysis = json.loads(txt)
@@ -1257,7 +1257,7 @@ def submit_accident_claim():
             Ensure the compensation estimate is realistic and the legal document is comprehensive.
             """
             try:
-                res = ai_client.models.generate_content(model="gemini-3-flash-preview", contents=prompt)
+                res = ai_client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
                 txt = res.text.strip()
                 if "```json" in txt: txt = txt.split("```json")[1].split("```")[0]
                 analysis = json.loads(txt)

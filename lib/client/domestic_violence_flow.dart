@@ -73,12 +73,14 @@ class _DomesticViolenceFlowScreenState extends State<DomesticViolenceFlowScreen>
                   children: [
                     Icon(Icons.location_off, color: dangerColor),
                     const SizedBox(width: 8),
-                    Text(
-                      "Enable Location Services",
-                      style: GoogleFonts.playfairDisplay(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: primaryColor,
+                    Expanded(
+                      child: Text(
+                        "Enable Location Services",
+                        style: GoogleFonts.playfairDisplay(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: primaryColor,
+                        ),
                       ),
                     ),
                   ],
