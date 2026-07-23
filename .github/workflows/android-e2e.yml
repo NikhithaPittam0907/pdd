@@ -149,8 +149,8 @@ jobs:
       - name: Publish Job Summary
         if: always()
         run: |
-          if [ -f "Test Results/Summary/summary.md" ]; then
-            cat "Test Results/Summary/summary.md" >> $GITHUB_STEP_SUMMARY
+          if [ -f "Test Results/Summary/executive_board.md" ]; then
+            cat "Test Results/Summary/executive_board.md" >> $GITHUB_STEP_SUMMARY
           else
-            echo "No test summary found." >> $GITHUB_STEP_SUMMARY
+            echo "No test summary board found." >> $GITHUB_STEP_SUMMARY
           fi
