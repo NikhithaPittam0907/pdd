@@ -47,13 +47,19 @@ class _LawyerDashboardState
             const Color(0xFF001A3A),
         unselectedItemColor:
             Colors.grey,
+        iconSize: 20,
+        selectedFontSize: 9.5,
+        unselectedFontSize: 8.5,
         selectedLabelStyle:
             GoogleFonts.inter(
           fontWeight:
               FontWeight.w600,
+          fontSize: 9.5,
         ),
         unselectedLabelStyle:
-            GoogleFonts.inter(),
+            GoogleFonts.inter(
+          fontSize: 8.5,
+        ),
         onTap: (index) {
           setState(() {
             currentIndex = index;
@@ -70,7 +76,7 @@ class _LawyerDashboardState
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month),
-            label: "Appointments",
+            label: "Appointment",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.search),
@@ -154,7 +160,7 @@ class LawyerHome extends StatelessWidget {
       },
       child: Container(
         padding:
-            const EdgeInsets.all(16),
+            const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius:
@@ -172,27 +178,13 @@ class LawyerHome extends StatelessWidget {
               MainAxisAlignment.center,
           children: [
             CircleAvatar(
-              radius: 26,
+              radius: 22,
               backgroundColor:
                   const Color(
                       0xFFEAF0FF),
               child: Icon(
                 icon,
-                color: const Color(
-                    0xFF0B132B),
-              ),
-            ),
-            const SizedBox(
-                height: 12),
-            Text(
-              title,
-              textAlign:
-                  TextAlign.center,
-              style:
-                  GoogleFonts.playfairDisplay(
-                fontSize: 18,
-                fontWeight:
-                    FontWeight.bold,
+                size: 20,
                 color: const Color(
                     0xFF0B132B),
               ),
@@ -200,15 +192,30 @@ class LawyerHome extends StatelessWidget {
             const SizedBox(
                 height: 8),
             Text(
+              title,
+              textAlign:
+                  TextAlign.center,
+              style:
+                  GoogleFonts.playfairDisplay(
+                fontSize: 16,
+                fontWeight:
+                    FontWeight.bold,
+                color: const Color(
+                    0xFF0B132B),
+              ),
+            ),
+            const SizedBox(
+                height: 4),
+            Text(
               subtitle,
               textAlign:
                   TextAlign.center,
               style:
                   GoogleFonts.inter(
-                fontSize: 12,
+                fontSize: 11,
                 color:
                     Colors.black54,
-                height: 1.5,
+                height: 1.4,
               ),
             ),
           ],
@@ -352,7 +359,7 @@ class LawyerHome extends StatelessWidget {
                     12,
                 mainAxisSpacing: 12,
                 childAspectRatio:
-                    0.88,
+                    0.74,
                 children: [
                   menuCard(
                     context,

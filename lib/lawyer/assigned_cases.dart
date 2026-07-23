@@ -199,6 +199,15 @@ class _AssignedCasesScreenState extends State<AssignedCasesScreen> {
               color: Colors.white,
               child: Row(
                 children: [
+                  if (Navigator.canPop(context)) ...[
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Color(0xFF0B132B)),
+                      onPressed: () => Navigator.pop(context),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
                   const Icon(Icons.gavel, color: Color(0xFF0B132B)),
                   const SizedBox(width: 10),
                   Text(

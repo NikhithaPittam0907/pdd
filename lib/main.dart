@@ -56,6 +56,18 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
 
+      builder: (context, child) {
+        return Material(
+          color: const Color(0xFF001A3A),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: child!,
+            ),
+          ),
+        );
+      },
+
       home: const SplashScreen(),
 
       routes: {

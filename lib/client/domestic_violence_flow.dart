@@ -61,9 +61,60 @@ class _DomesticViolenceFlowScreenState extends State<DomesticViolenceFlowScreen>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: $e")),
-        );
+        final errorStr = e.toString();
+        if (errorStr.contains("Location services are disabled") || errorStr.contains("disabled")) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                title: Row(
+                  children: [
+                    Icon(Icons.location_off, color: dangerColor),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Enable Location Services",
+                      style: GoogleFonts.playfairDisplay(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+                content: Text(
+                  "Location services are turned off on your device. Please turn on location to share your live location.",
+                  style: GoogleFonts.inter(fontSize: 14, height: 1.4),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text("Cancel", style: GoogleFonts.inter(color: Colors.grey)),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      await Geolocator.openLocationSettings();
+                    },
+                    child: Text(
+                      "Turn On",
+                      style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Error: $e")),
+          );
+        }
       }
     }
   }
@@ -861,7 +912,81 @@ class _DomesticViolenceFlowScreenState extends State<DomesticViolenceFlowScreen>
             color: primaryColor,
             bgColor: Colors.white,
             isSolid: true,
-            onTap: () => _assignCase("police"),
+            onTap: () {
+              final policeDetails = _caseResult?['police_station_1'] ?? "Nearest Local Police Station";
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    title: Row(
+                      children: [
+                        Icon(Icons.local_police, color: primaryColor),
+                        const SizedBox(width: 8),
+                        Text(
+                          "Submit to Police",
+                          style: GoogleFonts.playfairDisplay(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Your complaint will be submitted to the following police station:",
+                          style: GoogleFonts.inter(fontSize: 14, color: Colors.black87, height: 1.4),
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey.shade300),
+                          ),
+                          child: Text(
+                            policeDetails,
+                            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          "Do you want to proceed?",
+                          style: GoogleFonts.inter(fontSize: 14, color: Colors.black87),
+                        ),
+                      ],
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text("Cancel", style: GoogleFonts.inter(color: Colors.grey)),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _assignCase("police");
+                        },
+                        child: Text(
+                          "Submit",
+                          style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
           ),
           const SizedBox(height: 16),
           _finalActionButton(

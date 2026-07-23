@@ -4,6 +4,10 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/api_config.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class MyCasesScreen extends StatefulWidget {
   const MyCasesScreen({super.key});
@@ -226,9 +230,30 @@ class CaseDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> caseData;
   const CaseDetailsScreen({super.key, required this.caseData});
 
+  IconData _fileIcon(String filename) {
+    final lower = filename.toLowerCase();
+    if (lower.endsWith('.pdf')) return Icons.picture_as_pdf;
+    if (lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png')) return Icons.image;
+    if (lower.endsWith('.mp4') || lower.endsWith('.mov') || lower.endsWith('.avi')) return Icons.videocam;
+    return Icons.insert_drive_file;
+  }
+
+  String _resolveFileUrl(String serverPath) {
+    if (serverPath.isEmpty) return "";
+    if (serverPath.startsWith("http://") || serverPath.startsWith("https://")) {
+      return serverPath;
+    }
+    String cleanPath = serverPath.replaceAll('\\', '/');
+    if (cleanPath.startsWith("uploads/")) {
+      cleanPath = cleanPath.substring("uploads/".length);
+    }
+    return "${ApiConfig.baseUrl}/uploads/$cleanPath";
+  }
+
   @override
   Widget build(BuildContext context) {
     final analysis = caseData['analysis'] ?? {};
+    final details = caseData['details'] ?? {};
     final status = caseData['status'] ?? 'Submitted';
     final type = caseData['type'] ?? 'Legal Case';
     final caseId = caseData['case_id'] ?? 'N/A';
@@ -283,6 +308,118 @@ class CaseDetailsScreen extends StatelessWidget {
                 ),
               ),
               
+            // Incident Details & Uploaded Files
+            Text("INCIDENT DETAILS", style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Colors.black45)),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(20),
+              width: double.infinity,
+              decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(12)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ...details.entries.map((e) {
+                    if (e.key == 'uploaded_files' && e.value is Map) {
+                      final files = e.value as Map;
+                      if (files.isEmpty) return const SizedBox.shrink();
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "UPLOADED EVIDENCE",
+                              style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.black45),
+                            ),
+                            const SizedBox(height: 8),
+                            ...files.entries.map((fe) {
+                              final pathVal = fe.value.toString();
+                              final bool hasFile = pathVal.isNotEmpty;
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 8),
+                                child: InkWell(
+                                  onTap: !hasFile ? null : () async {
+                                    final url = _resolveFileUrl(pathVal);
+                                    if (url.isNotEmpty) {
+                                      final uri = Uri.parse(url);
+                                      if (await canLaunchUrl(uri)) {
+                                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                      }
+                                    }
+                                  },
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: hasFile ? Colors.blue.shade100 : Colors.grey.shade200),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          _fileIcon(pathVal),
+                                          color: hasFile ? Colors.blue.shade700 : const Color(0xFF0B132B),
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                fe.key.toString().replaceAll('_', ' ').toUpperCase(),
+                                                style: GoogleFonts.inter(fontSize: 10, color: Colors.black45, fontWeight: FontWeight.w600),
+                                              ),
+                                              Text(
+                                                hasFile ? pathVal.split('/').last : 'Not uploaded',
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 13,
+                                                  color: hasFile ? Colors.blue.shade900 : Colors.black87,
+                                                  fontWeight: hasFile ? FontWeight.w600 : FontWeight.normal,
+                                                  decoration: hasFile ? TextDecoration.underline : null,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        if (hasFile)
+                                          Icon(Icons.open_in_new, size: 16, color: Colors.blue.shade700),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }),
+                          ],
+                        ),
+                      );
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            e.key.toString().replaceAll('_', ' ').toUpperCase(),
+                            style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.black45),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            e.value.toString(),
+                            style: GoogleFonts.inter(fontSize: 14, color: Colors.black87),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+
             Text("CASE TIMELINE", style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Colors.black45)),
             const SizedBox(height: 24),
             
@@ -333,6 +470,7 @@ class CaseDetailsScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(20),
+              width: double.infinity,
               decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(12)),
               child: Text(
                 analysis['case_summary'] ?? "Detailed analysis is being prepared by LexisAI. Check back soon for legal suggestions.",
@@ -340,19 +478,57 @@ class CaseDetailsScreen extends StatelessWidget {
               ),
             ),
             
-            const SizedBox(height: 32),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.download_rounded),
-                    label: const Text("Download Complaint"),
-                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0B132B), padding: const EdgeInsets.symmetric(vertical: 16)),
-                  ),
+            if (analysis['complaint_draft'] != null && analysis['complaint_draft'].toString().trim().isNotEmpty) ...[
+              const SizedBox(height: 32),
+              Text("AI GENERATED COMPLAINT DRAFT", style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Colors.black45)),
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade200),
                 ),
-              ],
-            ),
+                child: Text(
+                  analysis['complaint_draft'].toString(),
+                  style: GoogleFonts.inter(fontSize: 13, height: 1.6, color: Colors.black87),
+                ),
+              ),
+              const SizedBox(height: 32),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        final text = analysis['complaint_draft'].toString();
+                        if (text.trim().isEmpty) return;
+                        final doc = pw.Document();
+                        doc.addPage(pw.MultiPage(
+                          pageFormat: PdfPageFormat.a4,
+                          margin: const pw.EdgeInsets.all(32),
+                          build: (pw.Context ctx) => [
+                            pw.Text('LexisAI — Domestic Violence Complaint',
+                                style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                            pw.SizedBox(height: 8),
+                            if (caseId.isNotEmpty)
+                              pw.Text('Case ID: $caseId',
+                                  style: pw.TextStyle(fontSize: 11, color: PdfColors.blue700)),
+                            pw.SizedBox(height: 16),
+                            pw.Text(text,
+                                style: const pw.TextStyle(fontSize: 12, lineSpacing: 4)),
+                          ],
+                        ));
+                        await Printing.layoutPdf(onLayout: (fmt) => doc.save());
+                      },
+                      icon: const Icon(Icons.download_rounded, color: Colors.white),
+                      label: const Text("Download Complaint PDF", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0B132B), padding: const EdgeInsets.symmetric(vertical: 16)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
       ),

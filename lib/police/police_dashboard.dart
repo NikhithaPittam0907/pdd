@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/api_config.dart';
 import '../screens/signin_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PoliceDashboard extends StatefulWidget {
   const PoliceDashboard({super.key});
@@ -155,6 +156,15 @@ class _PoliceDashboardState extends State<PoliceDashboard> {
               color: Colors.white,
               child: Row(
                 children: [
+                  if (Navigator.canPop(context)) ...[
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Color(0xFF0B132B)),
+                      onPressed: () => Navigator.pop(context),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
                   const Icon(Icons.local_police, color: Color(0xFF0B132B)),
                   const SizedBox(width: 10),
                   Text(
@@ -247,6 +257,18 @@ class PoliceCaseDetailsScreen extends StatefulWidget {
 
 class _PoliceCaseDetailsScreenState extends State<PoliceCaseDetailsScreen> {
   bool isAccepting = false;
+
+  String _resolveFileUrl(String serverPath) {
+    if (serverPath.isEmpty) return "";
+    if (serverPath.startsWith("http://") || serverPath.startsWith("https://")) {
+      return serverPath;
+    }
+    String cleanPath = serverPath.replaceAll('\\', '/');
+    if (cleanPath.startsWith("uploads/")) {
+      cleanPath = cleanPath.substring("uploads/".length);
+    }
+    return "${ApiConfig.baseUrl}/uploads/$cleanPath";
+  }
 
   IconData _fileIcon(String filename) {
     final lower = filename.toLowerCase();
@@ -345,40 +367,73 @@ class _PoliceCaseDetailsScreenState extends State<PoliceCaseDetailsScreen> {
                               style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.black45),
                             ),
                             const SizedBox(height: 8),
-                            ...files.entries.map((fe) => Container(
-                              margin: const EdgeInsets.only(bottom: 8),
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.grey.shade200),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    _fileIcon(fe.value.toString()),
-                                    color: const Color(0xFF0B132B),
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          fe.key.toString().replaceAll('_', ' ').toUpperCase(),
-                                          style: GoogleFonts.inter(fontSize: 10, color: Colors.black45, fontWeight: FontWeight.w600),
-                                        ),
-                                        Text(
-                                          fe.value.toString().isNotEmpty ? fe.value.toString() : 'Not uploaded',
-                                          style: GoogleFonts.inter(fontSize: 13, color: Colors.black87),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )),
+                            ...files.entries.map((fe) {
+                               final pathVal = fe.value.toString();
+                               final bool hasFile = pathVal.isNotEmpty;
+                               return Container(
+                                 margin: const EdgeInsets.only(bottom: 8),
+                                 child: InkWell(
+                                   onTap: !hasFile ? null : () async {
+                                     final url = _resolveFileUrl(pathVal);
+                                     if (url.isNotEmpty) {
+                                       final uri = Uri.parse(url);
+                                       if (await canLaunchUrl(uri)) {
+                                         await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                       } else {
+                                         if (context.mounted) {
+                                           ScaffoldMessenger.of(context).showSnackBar(
+                                             const SnackBar(content: Text("Could not open file URL")),
+                                           );
+                                         }
+                                       }
+                                     }
+                                   },
+                                   borderRadius: BorderRadius.circular(8),
+                                   child: Container(
+                                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                     decoration: BoxDecoration(
+                                       color: Colors.white,
+                                       borderRadius: BorderRadius.circular(8),
+                                       border: Border.all(color: hasFile ? Colors.blue.shade100 : Colors.grey.shade200),
+                                     ),
+                                     child: Row(
+                                       children: [
+                                         Icon(
+                                           _fileIcon(pathVal),
+                                           color: hasFile ? Colors.blue.shade700 : const Color(0xFF0B132B),
+                                           size: 20,
+                                         ),
+                                         const SizedBox(width: 10),
+                                         Expanded(
+                                           child: Column(
+                                             crossAxisAlignment: CrossAxisAlignment.start,
+                                             children: [
+                                               Text(
+                                                 fe.key.toString().replaceAll('_', ' ').toUpperCase(),
+                                                 style: GoogleFonts.inter(fontSize: 10, color: Colors.black45, fontWeight: FontWeight.w600),
+                                               ),
+                                               Text(
+                                                 hasFile ? pathVal.split('/').last : 'Not uploaded',
+                                                 style: GoogleFonts.inter(
+                                                   fontSize: 13,
+                                                   color: hasFile ? Colors.blue.shade900 : Colors.black87,
+                                                   fontWeight: hasFile ? FontWeight.w600 : FontWeight.normal,
+                                                   decoration: hasFile ? TextDecoration.underline : null,
+                                                 ),
+                                                 maxLines: 1,
+                                                 overflow: TextOverflow.ellipsis,
+                                               ),
+                                             ],
+                                           ),
+                                         ),
+                                         if (hasFile)
+                                           Icon(Icons.open_in_new, size: 16, color: Colors.blue.shade700),
+                                       ],
+                                     ),
+                                   ),
+                                 ),
+                               );
+                             }),
                           ],
                         ),
                       );
@@ -435,6 +490,24 @@ class _PoliceCaseDetailsScreenState extends State<PoliceCaseDetailsScreen> {
                 ],
               ),
             ),
+            if (analysis['complaint_draft'] != null && analysis['complaint_draft'].toString().trim().isNotEmpty) ...[
+              const SizedBox(height: 32),
+              Text("AI GENERATED COMPLAINT DRAFT", style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Colors.black45)),
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Text(
+                  analysis['complaint_draft'].toString(),
+                  style: GoogleFonts.inter(fontSize: 13, height: 1.6, color: Colors.black87),
+                ),
+              ),
+            ],
             const SizedBox(height: 40),
             
             // Action Button

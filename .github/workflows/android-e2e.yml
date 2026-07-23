@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   e2e-test:
-    runs-on: macos-latest
+    runs-on: macos-13
 
     steps:
       # Stage 1: Checkout Repository
@@ -60,8 +60,6 @@ jobs:
 
       # Stage 5: Build APK
       - name: Build Android APK
-        env:
-          KOTLIN_HOME: ""
         run: |
           flutter clean
           flutter pub get

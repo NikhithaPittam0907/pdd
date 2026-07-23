@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import smtplib
 from email.mime.text import MIMEText
 import concurrent.futures
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.mysql import JSON
@@ -117,6 +117,8 @@ with app.app_context():
 
 # AI Config
 gemini_api_key = os.getenv("GEMINI_API_KEY")
+if not gemini_api_key or gemini_api_key == "YOUR_API_KEY_HERE" or gemini_api_key.startswith("AIzaSyDuo5"):
+    gemini_api_key = os.getenv("GOOGLE_API_KEY") or gemini_api_key
 ai_client = genai.Client(api_key=gemini_api_key) if gemini_api_key and gemini_api_key != "YOUR_API_KEY_HERE" else None
 
 # ─── Helpers ────────────────────────────────────────────────────────────────
@@ -152,6 +154,10 @@ def _extract_text_from_docx(file_path):
 @app.route("/")
 def home():
     return jsonify({"message": "LegalAssist AI Backend Running"}), 200
+
+@app.route("/uploads/<path:filename>")
+def serve_upload(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route("/get-lawyers", methods=["GET"])
 def get_lawyers():
@@ -425,6 +431,7 @@ def assign_case():
     data = request.get_json()
     case_id = data.get("case_id")
     assign_to = data.get("assign_to")
+    email = data.get("email")
     
     if not case_id or not assign_to:
         return jsonify({"message": "Missing required fields"}), 400
@@ -434,14 +441,19 @@ def assign_case():
         return jsonify({"message": "Case not found"}), 404
         
     if assign_to == "lawyer":
-        case.assigned_lawyer = "unassigned_lawyer_pool"
-        case.handling_status = "Lawyer Requested"
+        case.assigned_lawyer = email or "unassigned_lawyer_pool"
+        case.handling_status = "Lawyer Assigned" if email else "Lawyer Requested"
+        if email:
+            case.status = "Assigned"
     elif assign_to == "police":
-        case.assigned_police = "unassigned_police_pool"
-        case.handling_status = "Police Notified"
+        case.assigned_police = email or "unassigned_police_pool"
+        case.handling_status = "Police Assigned" if email else "Police Notified"
+        if email:
+            case.status = "Assigned"
         
     db.session.commit()
     return jsonify({"message": f"Case assigned to {assign_to} successfully"}), 200
+
 
 @app.route("/accept-case", methods=["POST"])
 def accept_case():
@@ -477,12 +489,15 @@ def lawyer_cases():
     cases = Case.query.filter(Case.assigned_lawyer != None).all()
     all_cases = []
     for c in cases:
-        # Sanitize uploaded_files to only show file names, not full server paths
         details = c.details or {}
         if "uploaded_files" in details:
             sanitized = {}
             for k, v in details["uploaded_files"].items():
-                sanitized[k] = os.path.basename(v) if v else ""
+                if v:
+                    rel_path = os.path.relpath(v, app.config['UPLOAD_FOLDER']).replace('\\', '/')
+                    sanitized[k] = rel_path
+                else:
+                    sanitized[k] = ""
             details = {**details, "uploaded_files": sanitized}
         all_cases.append({
             "case_id": c.case_id,
@@ -501,12 +516,15 @@ def police_cases():
     cases = Case.query.filter(Case.assigned_police != None).all()
     all_cases = []
     for c in cases:
-        # Sanitize uploaded_files to only show file names, not full server paths
         details = c.details or {}
         if "uploaded_files" in details:
             sanitized = {}
             for k, v in details["uploaded_files"].items():
-                sanitized[k] = os.path.basename(v) if v else ""
+                if v:
+                    rel_path = os.path.relpath(v, app.config['UPLOAD_FOLDER']).replace('\\', '/')
+                    sanitized[k] = rel_path
+                else:
+                    sanitized[k] = ""
             details = {**details, "uploaded_files": sanitized}
         all_cases.append({
             "case_id": c.case_id,
@@ -1274,11 +1292,14 @@ def submit_dv_complaint():
     try:
         email = request.form.get("email")
         description = request.form.get("description")
+        user = User.query.filter_by(email=email).first()
+        user_name = user.name if user and user.name else "[Complainant Name]"
+        user_phone = user.phone if user and user.phone else "[Phone Number]"
         latitude = request.form.get("latitude")
         longitude = request.form.get("longitude")
         
         location_context = ""
-        if latitude and longitude:
+        if latitude and longitude and str(latitude).lower() != "null" and str(longitude).lower() != "null" and str(latitude).lower() != "none" and str(longitude).lower() != "none" and str(latitude).strip() != "" and str(longitude).strip() != "":
             location_context = f"The user is located at EXACT Coordinates: Latitude {latitude}, Longitude {longitude}. Please use your internal map knowledge to find ONE real police station exactly near these coordinates."
 
         category_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'domestic_violence')
@@ -1345,7 +1366,7 @@ def submit_dv_complaint():
             """
             try:
                 res = client.models.generate_content(
-                    model="gemini-2.5-pro",
+                    model="gemini-2.5-flash",
                     contents=[prompt] + files,
                     config=safe_config
                 )
@@ -1357,9 +1378,21 @@ def submit_dv_complaint():
         def agent_risk_analysis(desc, files, client):
             if not client: return {}
             prompt = f"""
-            TASK - RISK ANALYSIS:
-            Analyze this domestic violence case description: {desc}
-            Consider any evidence in the attached files.
+            TASK - RISK ANALYSIS & DETAILED LEGAL ACTIONS:
+            Analyze this domestic violence case description: "{desc}"
+            Consider any evidence in the attached files (ID proof, photos, medical reports, chat transcripts, etc.).
+            
+            Please provide:
+            1. Risk Level (HIGH, MEDIUM, or LOW) based on direct threats, physical violence, weapon involvement, children, etc.
+            2. Risk Summary: A brief explanation of the risk level.
+            3. Case Summary: 2-3 sentences summarizing the situation.
+            4. How Risk Analysis is Calculated: Detail the specific factors (e.g. physical harm, weapon use, ongoing threat) from the user's description and evidence.
+            5. Missing Documents: Identify documents that are missing but would support their case (e.g., medical certificates/MLC if physical injury is mentioned, marriage certificate, screenshots of messages/threats, witness statements).
+            6. Legal Actions: Provide clear, correct, and actionable legal steps under Indian law, specific to the incident.
+               - Cite appropriate legal provisions, such as Section 85/86 of BNS, 2023 (formerly Section 498A of IPC) for cruelty by husband/relatives.
+               - Mention remedies under the Protection of Women from Domestic Violence Act (PWDVA), 2005 (e.g., Protection Orders under Section 18, Residence Orders under Section 19, Monetary Relief under Section 20, Custody Orders under Section 21).
+               - Advise on filing an FIR (First Information Report) or a Zero FIR at the nearest police station.
+               - Tailor the actions to the evidence. For instance, if digital evidence/chats are present, suggest filing certificate under Section 63 of Bharatiya Sakshya Adhiniyam (BSA), 2023. If physical injuries are described, suggest obtaining a Medical Legal Case (MLC) report from a government hospital.
             
             Respond ONLY in valid JSON:
             {{
@@ -1368,12 +1401,12 @@ def submit_dv_complaint():
               "case_summary": "2-3 sentence summary",
               "how_risk_analysis_calculated": "explanation of how the risk score was determined",
               "missing_documents": ["list", "of", "missing", "docs"],
-              "legal_actions": ["list", "of", "legal", "steps"]
+              "legal_actions": ["list", "of", "clear, specific legal steps"]
             }}
             """
             try:
                 res = client.models.generate_content(
-                    model="gemini-2.5-pro",
+                    model="gemini-2.5-flash",
                     contents=[prompt] + files,
                     config=safe_config
                 )
@@ -1382,24 +1415,34 @@ def submit_dv_complaint():
                 print(f"Risk Agent Error: {e}")
                 return {}
 
-        def agent_local_support(loc_ctx, client):
+        def agent_local_support(loc_ctx, desc, files, client):
             if not client: return {}
             prompt = f"""
             TASK - LOCAL SUPPORT & POLICE STATIONS:
-            {loc_ctx if loc_ctx else "Location not provided. Suggest 1 major real police station in New Delhi."}
-            Based on the location, name ONE real, verifiable police station closest to that location. Include full address.
-            Also suggest a generic but real lawyer category or organization for domestic violence.
+            We need to find the user's location and name ONE real, verifiable police station closest to them.
+            
+            Here is the information we have:
+            1. GPS Location Context: {loc_ctx if loc_ctx else "None"}
+            2. User's Description of the incident: "{desc}"
+            
+            Please analyze:
+            - The GPS coordinates (if provided above, prioritize them).
+            - Any mention of city, area, neighbourhood, address, or landmark in the User's Description of the incident.
+            - If no coordinates are available and no clear city is mentioned in the description, look at the uploaded files (like Aadhaar card or PAN card) to find the address, city, district, state, or PIN code of the user.
+            
+            Based on this, identify the exact location/city. Then, name ONE real, verifiable, existing police station closest to that location. You must provide the exact name and full address of the police station. Do not suggest mock or generic police stations.
+            Also suggest a real domestic violence lawyer, legal aid cell (DLSA/SLSA), or family law organization in that city/region.
             
             Respond ONLY in valid JSON:
             {{
-              "police_station_1": "Name, Full Address",
-              "suggested_lawyer": "Name and contact or organization"
+              "police_station_1": "Exact Police Station Name, Full Address",
+              "suggested_lawyer": "Name, contact or organization"
             }}
             """
             try:
                 res = client.models.generate_content(
-                    model="gemini-2.5-pro",
-                    contents=prompt,
+                    model="gemini-2.5-flash",
+                    contents=[prompt] + files,
                     config=safe_config
                 )
                 return json.loads(res.text.strip().replace("```json", "").replace("```", ""))
@@ -1407,27 +1450,43 @@ def submit_dv_complaint():
                 print(f"Support Agent Error: {e}")
                 return {}
 
-        def agent_legal_draft(desc, id_data, client):
+        def agent_legal_draft(desc, id_data, u_name, u_phone, client):
             if not client: return {}
-            v_name = id_data.get("victim_name", "[Complainant Name]")
-            if not v_name: v_name = "[Complainant Name]"
-            v_id = id_data.get("victim_id_number", "[ID Number]")
-            if not v_id: v_id = "[ID Number]"
+            v_name = id_data.get("victim_name")
+            if not v_name or v_name == "[Complainant Name]" or v_name == "Unknown" or not str(v_name).strip():
+                v_name = u_name
+            v_id = id_data.get("victim_id_number")
+            if not v_id or v_id == "[ID Number]" or v_id == "Unknown" or not str(v_id).strip():
+                v_id = u_phone
+                
             prompt = f"""
             TASK - COMPLAINT DRAFT:
-            Write a formal FIR/complaint letter for domestic violence.
-            Victim Name: {v_name}
-            Victim ID: {v_id}
-            Description of Incident: {desc}
+            Write a formal and legally correct First Information Report (FIR)/complaint letter for domestic violence under Indian law.
+            
+            Complainant Details:
+            - Name: {v_name}
+            - ID / Phone: {v_id}
+            
+            Incident Details:
+            - Description: "{desc}"
+            
+            Legal Drafting Guidelines:
+            - Address the complaint to the "Station House Officer" (SHO).
+            - Cite the correct legal sections under the new Bharatiya Nyaya Sanhita (BNS), 2023 (which replaced the old IPC):
+              - Section 85/86 of BNS (Cruelty by husband or relatives of husband).
+              - Section 115 of BNS (Voluntarily causing hurt) if physical injuries or hitting is mentioned.
+              - Section 127 of BNS (Wrongful confinement) if the victim describes being locked in a room or kept confined.
+              - Section 351 of BNS (Criminal intimidation) if threats are described.
+            - Ensure the complaint draft reads professionally, with a formal subject line, structured description of facts, and a request for immediate register of FIR and protection.
             
             Respond ONLY in valid JSON:
             {{
-              "complaint_draft": "Full formal complaint text with victim name and ID filled in"
+              "complaint_draft": "Full formal BNS-compliant complaint letter text."
             }}
             """
             try:
                 res = client.models.generate_content(
-                    model="gemini-2.5-pro",
+                    model="gemini-2.5-flash",
                     contents=prompt,
                     config=types.GenerateContentConfig(response_mime_type="application/json")
                 )
@@ -1440,13 +1499,13 @@ def submit_dv_complaint():
             with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
                 future_id = executor.submit(agent_id_verification, gemini_files, ai_client)
                 future_risk = executor.submit(agent_risk_analysis, description, gemini_files, ai_client)
-                future_support = executor.submit(agent_local_support, location_context, ai_client)
+                future_support = executor.submit(agent_local_support, location_context, description, gemini_files, ai_client)
                 
                 id_data = future_id.result()
                 risk_data = future_risk.result()
                 support_data = future_support.result()
                 
-            draft_data = agent_legal_draft(description, id_data, ai_client)
+            draft_data = agent_legal_draft(description, id_data, user_name, user_phone, ai_client)
             
             # Merge agent outputs
             if id_data: analysis.update(id_data)
@@ -1540,6 +1599,75 @@ def get_my_cases():
         return jsonify(all_cases), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route("/admin/users", methods=["GET"])
+def admin_users():
+    try:
+        users = User.query.all()
+        return jsonify([
+            {
+                "id": u.id,
+                "email": u.email,
+                "name": u.name or u.email.split("@")[0].capitalize(),
+                "phone": u.phone or "",
+                "role": u.role
+            }
+            for u in users
+        ]), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/admin/all-cases", methods=["GET"])
+def admin_all_cases():
+    try:
+        cases = Case.query.order_by(Case.created_at.desc()).all()
+        all_cases = []
+        for c in cases:
+            details = c.details or {}
+            if "uploaded_files" in details and isinstance(details["uploaded_files"], dict):
+                sanitized = {}
+                for k, v in details["uploaded_files"].items():
+                    if v:
+                        rel_path = os.path.relpath(v, app.config['UPLOAD_FOLDER']).replace('\\', '/')
+                        sanitized[k] = rel_path
+                    else:
+                        sanitized[k] = ""
+                details = {**details, "uploaded_files": sanitized}
+            
+            all_cases.append({
+                "case_id": c.case_id,
+                "type": c.type,
+                "email": c.email,
+                "details": details,
+                "analysis": c.analysis or {},
+                "status": c.status,
+                "assigned_lawyer": c.assigned_lawyer,
+                "assigned_police": c.assigned_police,
+                "handling_status": c.handling_status,
+                "created_at": c.created_at.isoformat() if c.created_at else None
+            })
+        return jsonify(all_cases), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/admin/delete-user", methods=["POST"])
+def admin_delete_user():
+    try:
+        data = request.get_json()
+        email = data.get("email")
+        if not email:
+            return jsonify({"message": "Email is required"}), 400
+        
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return jsonify({"message": "User not found"}), 404
+            
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({"message": "User deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
 
 
 if __name__ == "__main__":
