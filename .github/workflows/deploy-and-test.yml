@@ -59,7 +59,8 @@ jobs:
       # Stage 3: Build Application
       - name: Build Flutter Web App
         run: |
-          flutter build web --release
+          flutter build web --release --base-href /${{ github.event.repository.name }}/
+          cp build/web/index.html build/web/404.html
 
       # Stage 4: Static Analysis
       - name: Static Lint Verification

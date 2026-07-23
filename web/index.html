@@ -15,6 +15,20 @@
     the `--base-href` argument provided to `flutter build`.
   -->
   <base href="$FLUTTER_BASE_HREF">
+  <script>
+    (function() {
+      var base = document.querySelector('base');
+      if (base) {
+        var currentHref = base.getAttribute('href');
+        if (currentHref === '$FLUTTER_BASE_HREF' || currentHref === '/') {
+          var path = window.location.pathname;
+          if (path.indexOf('/pdd/') !== -1) {
+            base.setAttribute('href', '/pdd/');
+          }
+        }
+      }
+    })();
+  </script>
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
