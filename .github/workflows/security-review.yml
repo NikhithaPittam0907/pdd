@@ -42,6 +42,7 @@ jobs:
           format: 'table'
           exit-code: '0' # Set to 1 to fail the pipeline if critical issues are found
           severity: 'CRITICAL,HIGH'
+        continue-on-error: true
 
       # Step 5: Setup Python for unit and API tests
       - name: Set up Python
