@@ -71,7 +71,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ).showSnackBar(SnackBar(content: Text(data["message"])));
 
       if (response.statusCode == 201) {
-        // Trigger the "Save Password" prompt
         TextInput.finishAutofillContext();
 
         Navigator.pushReplacement(
@@ -197,186 +196,204 @@ class _SignUpScreenState extends State<SignUpScreen> {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    Text(
-                      "Create Account",
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.playfairDisplay(
-                        fontSize: 34,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF0B132B),
-                      ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    Text(
-                      "Register securely to access your AI-powered legal dashboard.",
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        color: Colors.black54,
-                        height: 1.6,
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
+                child: Center(
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 520),
+                    child: Column(
                       children: [
-                        topTag(Icons.security, "Secure"),
-                        topTag(Icons.smart_toy, "AI Ready"),
-                        topTag(Icons.verified, "Trusted"),
-                      ],
-                    ),
+                        Text(
+                          "Create Account",
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.playfairDisplay(
+                            fontSize: 34,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF0B132B),
+                          ),
+                        ),
 
-                    const SizedBox(height: 24),
+                        const SizedBox(height: 12),
 
-                    Container(
-                      padding: const EdgeInsets.all(22),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: const [
-                          BoxShadow(color: Colors.black12, blurRadius: 8),
-                        ],
-                      ),
-                      child: AutofillGroup(
-                        child: Column(
+                        Text(
+                          "Register securely to access your AI-powered legal dashboard.",
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            color: Colors.black54,
+                            height: 1.6,
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
                           children: [
-                          buildField(
-                            label: "Full Name",
-                            hint: "Enter your name",
-                            controller: nameController,
-                            autofillHints: const [AutofillHints.name],
-                          ),
-                          const SizedBox(height: 16),
-                           buildField(
-                            label: "Email",
-                            hint: "name@email.com",
-                            controller: emailController,
-                            autofillHints: const [AutofillHints.email],
-                          ),
-                          const SizedBox(height: 16),
-                           buildField(
-                            label: "Phone",
-                            hint: "9876543210",
-                            controller: phoneController,
-                            autofillHints: const [AutofillHints.telephoneNumber],
-                          ),
-                          const SizedBox(height: 16),
-                          buildField(
-                            label: "Password",
-                            hint: "••••••••",
-                            controller: passwordController,
-                            isPassword: true,
-                            autofillHints: const [AutofillHints.newPassword],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            "Must be 8+ chars with uppercase, lowercase, number & special char.",
-                            style: GoogleFonts.inter(fontSize: 11, color: Colors.black54),
-                          ),
-                          const SizedBox(height: 16),
-                          buildField(
-                            label: "Confirm Password",
-                            hint: "••••••••",
-                            controller: confirmController,
-                            isPassword: true,
-                            autofillHints: const [AutofillHints.newPassword],
-                          ),
-                          const SizedBox(height: 16),
+                            topTag(Icons.security, "Secure"),
+                            topTag(Icons.smart_toy, "AI Ready"),
+                            topTag(Icons.verified, "Trusted"),
+                          ],
+                        ),
 
-                          DropdownButtonFormField<String>(
-                            value: selectedRole,
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            items: const [
-                              DropdownMenuItem(
-                                value: "client",
-                                child: Text("Client"),
-                              ),
-                              DropdownMenuItem(
-                                value: "lawyer",
-                                child: Text("Lawyer"),
-                              ),
-                              DropdownMenuItem(
-                                value: "police",
-                                child: Text("Police"),
-                              ),
-                              DropdownMenuItem(
-                                value: "admin",
-                                child: Text("Admin"),
-                              ),
+                        const SizedBox(height: 24),
+
+                        Container(
+                          padding: const EdgeInsets.all(22),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: const [
+                              BoxShadow(color: Colors.black12, blurRadius: 8),
                             ],
-                            onChanged: (value) {
-                              setState(() {
-                                selectedRole = value!;
-                              });
-                            },
                           ),
-
-                          const SizedBox(height: 22),
-
-                          SizedBox(
-                            width: double.infinity,
-                            height: 55,
-                            child: ElevatedButton(
-                              onPressed: isLoading ? null : signUpUser,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF001A3A),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
+                          child: AutofillGroup(
+                            child: Column(
+                              children: [
+                                buildField(
+                                  label: "Full Name",
+                                  hint: "Enter your name",
+                                  controller: nameController,
+                                  autofillHints: const [AutofillHints.name],
                                 ),
-                              ),
-                              child: isLoading
-                                  ? const CircularProgressIndicator(
-                                      color: Colors.white,
-                                    )
-                                  : Text(
-                                      "CREATE ACCOUNT →",
-                                      style: GoogleFonts.inter(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
+                                const SizedBox(height: 16),
+                                buildField(
+                                  label: "Email",
+                                  hint: "name@email.com",
+                                  controller: emailController,
+                                  autofillHints: const [AutofillHints.email],
+                                ),
+                                const SizedBox(height: 16),
+                                buildField(
+                                  label: "Phone",
+                                  hint: "9876543210",
+                                  controller: phoneController,
+                                  autofillHints: const [AutofillHints.telephoneNumber],
+                                ),
+                                const SizedBox(height: 16),
+                                buildField(
+                                  label: "Password",
+                                  hint: "••••••••",
+                                  controller: passwordController,
+                                  isPassword: true,
+                                  autofillHints: const [AutofillHints.newPassword],
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  "Must be 8+ chars with uppercase, lowercase, number & special char.",
+                                  style: GoogleFonts.inter(fontSize: 11, color: Colors.black54),
+                                ),
+                                const SizedBox(height: 16),
+                                buildField(
+                                  label: "Confirm Password",
+                                  hint: "••••••••",
+                                  controller: confirmController,
+                                  isPassword: true,
+                                  autofillHints: const [AutofillHints.newPassword],
+                                ),
+                                const SizedBox(height: 16),
+
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(color: Colors.grey.shade300),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.person_outline, color: Color(0xFF001A3A)),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "ACCOUNT TYPE",
+                                              style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              "Client Account",
+                                              style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF001A3A)),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFEAF0FF),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          "Standard",
+                                          style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: const Color(0xFF001A3A)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  "ℹ️ Lawyer and Police accounts are issued exclusively by the System Administrator.",
+                                  style: GoogleFonts.inter(fontSize: 11, color: Colors.black54, fontStyle: FontStyle.italic),
+                                ),
+
+                                const SizedBox(height: 22),
+
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 55,
+                                  child: ElevatedButton(
+                                    onPressed: isLoading ? null : signUpUser,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF001A3A),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
                                       ),
                                     ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 18),
-
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const SignInScreen(),
+                                    child: isLoading
+                                        ? const CircularProgressIndicator(
+                                            color: Colors.white,
+                                          )
+                                        : Text(
+                                            "CREATE ACCOUNT →",
+                                            style: GoogleFonts.inter(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                  ),
                                 ),
-                              );
-                            },
-                            child: Text(
-                              "Already have an account? Sign In",
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF0B132B),
-                              ),
+
+                                const SizedBox(height: 18),
+
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => const SignInScreen(),
+                                      ),
+                                    );
+                                  },
+                                  child: Text(
+                                    "Already have an account? Sign In",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF0B132B),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                  ],
                 ),
               ),
             ),

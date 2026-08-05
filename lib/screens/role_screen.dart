@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../client/client_dashboard.dart';
-import '../lawyer/lawyer_dashboard.dart';
-import '../admin/admin_dashboard.dart';
+import 'signin_screen.dart';
 
 class RoleScreen extends StatelessWidget {
   const RoleScreen({super.key});
@@ -124,111 +122,108 @@ class RoleScreen extends StatelessWidget {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 10),
-
-                    Text(
-                      "Choose Your Portal",
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.playfairDisplay(
-                        fontSize: 34,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF0B132B),
-                      ),
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    Text(
-                      "Select your secure access portal to continue into the legal platform.",
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        color: Colors.black54,
-                        height: 1.6,
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      alignment: WrapAlignment.center,
+                child: Center(
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 580),
+                    child: Column(
                       children: [
-                        topTag(Icons.security, "Secure"),
-                        topTag(Icons.smart_toy, "AI Enabled"),
-                        topTag(Icons.workspace_premium, "Premium"),
+                        const SizedBox(height: 10),
+
+                        Text(
+                          "Choose Your Portal",
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.playfairDisplay(
+                            fontSize: 34,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF0B132B),
+                          ),
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        Text(
+                          "Select your secure access portal to continue into the legal platform.",
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            color: Colors.black54,
+                            height: 1.6,
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          alignment: WrapAlignment.center,
+                          children: [
+                            topTag(Icons.security, "Secure"),
+                            topTag(Icons.smart_toy, "AI Enabled"),
+                            topTag(Icons.workspace_premium, "Premium"),
+                          ],
+                        ),
+
+                        const SizedBox(height: 28),
+
+                        roleCard(
+                          context,
+                          Icons.people,
+                          "Client",
+                          "Track cases, upload documents and book consultations.",
+                          const SignInScreen(),
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        roleCard(
+                          context,
+                          Icons.gavel,
+                          "Lawyer",
+                          "Research, strategy, hearings and legal drafting tools.",
+                          const SignInScreen(),
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        roleCard(
+                          context,
+                          Icons.local_police,
+                          "Police",
+                          "Manage crime records, incident reports and safety tasks.",
+                          const SignInScreen(),
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        roleCard(
+                          context,
+                          Icons.admin_panel_settings,
+                          "Admin",
+                          "Allocate cases, manage staff and oversee platform performance.",
+                          const SignInScreen(),
+                        ),
+
+                        const SizedBox(height: 30),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.lock_outline, size: 16, color: Colors.grey),
+                            const SizedBox(width: 6),
+                            Text(
+                              "256-Bit Encrypted Portal Access",
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
-
-                    const SizedBox(height: 28),
-
-                    roleCard(
-                      context,
-                      Icons.people,
-                      "Client",
-                      "Track cases, upload documents and book consultations.",
-                      const ClientDashboard(),
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    roleCard(
-                      context,
-                      Icons.gavel,
-                      "Lawyer",
-                      "Research, strategy, hearings and legal drafting tools.",
-                      const LawyerDashboard(),
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    roleCard(
-                      context,
-                      Icons.admin_panel_settings,
-                      "Admin",
-                      "Manage lawyers, analytics and operational workflow.",
-                      const AdminDashboard(),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(18),
-              color: const Color(0xFFF1F3F8),
-              child: Column(
-                children: [
-                  Text(
-                    "© 2024 LEXISAI. ATTORNEY-CLIENT PRIVILEGED.",
-                    style: GoogleFonts.inter(fontSize: 11),
-                  ),
-                  const SizedBox(height: 14),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Text(
-                        "PRIVACY\nPOLICY",
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(fontSize: 11),
-                      ),
-                      Text(
-                        "TERMS OF\nSERVICE",
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(fontSize: 11),
-                      ),
-                      Text(
-                        "SECURITY\nARCHITECTURE",
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(fontSize: 11),
-                      ),
-                    ],
-                  ),
-                ],
               ),
             ),
           ],

@@ -13,6 +13,7 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import '../widgets/web_layout.dart';
 
 class DomesticViolenceFlowScreen extends StatefulWidget {
   const DomesticViolenceFlowScreen({super.key});
@@ -256,7 +257,7 @@ class _DomesticViolenceFlowScreenState extends State<DomesticViolenceFlowScreen>
           setState(() { 
             _caseResult = json.decode(res.body); 
             _isSubmitting = false; 
-            _complaintController.text = _caseResult?['complaint_draft'] ?? "To,\nThe Officer-in-Charge,\n[Local Police Station Name]\n\nSubject: Formal Complaint regarding Domestic Violence under Section 498A.\n\nRespected Sir/Madam,\n\nI, [Your Name], wish to report a case of continuous domestic violence.\n\n${descriptionController.text}\n\nI request immediate intervention and a protection order.\n\nSincerely,\n[Your Name]";
+            _complaintController.text = _caseResult?['complaint_draft'] ?? "To,\nThe Officer-in-Charge,\n[Local Police Station Name]\n\nSubject: Formal Legal Complaint under Section 498A.\n\nRespected Sir/Madam,\n\nI, [Your Name], wish to report an official legal complaint.\n\n${descriptionController.text}\n\nI request immediate intervention and protection.\n\nSincerely,\n[Your Name]";
           });
         }
       } else {
@@ -264,7 +265,7 @@ class _DomesticViolenceFlowScreenState extends State<DomesticViolenceFlowScreen>
         if (mounted) {
           setState(() {
             _isSubmitting = false;
-            _complaintController.text = "To,\nThe Officer-in-Charge,\n[Local Police Station Name]\n\nSubject: Formal Complaint regarding Domestic Violence under Section 498A.\n\nRespected Sir/Madam,\n\nI, [Your Name], wish to report a case of continuous domestic violence.\n\n${descriptionController.text}\n\nI request immediate intervention and a protection order.\n\nSincerely,\n[Your Name]";
+            _complaintController.text = "To,\nThe Officer-in-Charge,\n[Local Police Station Name]\n\nSubject: Formal Legal Complaint under Section 498A.\n\nRespected Sir/Madam,\n\nI, [Your Name], wish to report an official legal complaint.\n\n${descriptionController.text}\n\nI request immediate intervention and protection.\n\nSincerely,\n[Your Name]";
           });
         }
       }
@@ -273,7 +274,7 @@ class _DomesticViolenceFlowScreenState extends State<DomesticViolenceFlowScreen>
       if (mounted) {
         setState(() {
           _isSubmitting = false;
-          _complaintController.text = "To,\nThe Officer-in-Charge,\n[Local Police Station Name]\n\nSubject: Formal Complaint regarding Domestic Violence under Section 498A.\n\nRespected Sir/Madam,\n\nI, [Your Name], wish to report a case of continuous domestic violence.\n\n${descriptionController.text}\n\nI request immediate intervention and a protection order.\n\nSincerely,\n[Your Name]";
+          _complaintController.text = "To,\nThe Officer-in-Charge,\n[Local Police Station Name]\n\nSubject: Formal Legal Complaint under Section 498A.\n\nRespected Sir/Madam,\n\nI, [Your Name], wish to report an official legal complaint.\n\n${descriptionController.text}\n\nI request immediate intervention and protection.\n\nSincerely,\n[Your Name]";
         });
       }
     }
@@ -300,42 +301,54 @@ class _DomesticViolenceFlowScreenState extends State<DomesticViolenceFlowScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: bgLight,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: primaryColor),
-          onPressed: _prevPage,
-        ),
-        title: Text(
-          "Secure Reporting",
-          style: GoogleFonts.playfairDisplay(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: primaryColor,
+    return WillPopScope(
+      onWillPop: () async {
+        if (_currentPage > 0) {
+          _prevPage();
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
+        backgroundColor: bgLight,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: primaryColor),
+            onPressed: _prevPage,
           ),
+          title: Text(
+            "Secure Reporting",
+            style: GoogleFonts.playfairDisplay(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: primaryColor,
+            ),
+          ),
+          centerTitle: false,
         ),
-        centerTitle: false,
-      ),
-      body: PageView(
-        controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(),
-        onPageChanged: (index) {
-          setState(() {
-            _currentPage = index;
-          });
-        },
-        children: [
-          _buildStep1SafetyFirst(),
-          _buildStep2Description(),
-          _buildStep3FileUpload(),
-          _buildStep4AIAnalysis(),
-          _buildStep5FIRGenerator(),
-          _buildStep6ActionOptions(),
-          _buildStep7CaseTracking(),
-        ],
+        body: WebLayout(
+          maxWidth: 1200,
+          child: PageView(
+          controller: _pageController,
+          physics: const NeverScrollableScrollPhysics(),
+          onPageChanged: (index) {
+            setState(() {
+              _currentPage = index;
+            });
+          },
+          children: [
+            _buildStep1SafetyFirst(),
+            _buildStep2Description(),
+            _buildStep3FileUpload(),
+            _buildStep4AIAnalysis(),
+            _buildStep5FIRGenerator(),
+            _buildStep6ActionOptions(),
+            _buildStep7CaseTracking(),
+          ],
+        ),
+        ),
       ),
     );
   }
@@ -782,12 +795,14 @@ class _DomesticViolenceFlowScreenState extends State<DomesticViolenceFlowScreen>
         children: [
           const Icon(Icons.check_circle, color: Color(0xFF388E3C), size: 18),
           const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: primaryColor)),
-              Text(subtitle, style: GoogleFonts.inter(fontSize: 11, color: Colors.black54)),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: primaryColor)),
+                Text(subtitle, style: GoogleFonts.inter(fontSize: 11, color: Colors.black54)),
+              ],
+            ),
           ),
         ],
       ),
@@ -837,7 +852,7 @@ class _DomesticViolenceFlowScreenState extends State<DomesticViolenceFlowScreen>
                       pageFormat: PdfPageFormat.a4,
                       margin: const pw.EdgeInsets.all(32),
                       build: (pw.Context ctx) => [
-                        pw.Text('LexisAI — Domestic Violence Complaint',
+                        pw.Text('LexisAI — Formal Complaint',
                             style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
                         pw.SizedBox(height: 8),
                         if (caseId.isNotEmpty)

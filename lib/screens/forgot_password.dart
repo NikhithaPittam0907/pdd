@@ -162,96 +162,101 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(color: const Color(0xFFEAF0FF), borderRadius: BorderRadius.circular(20)),
-                      child: const Icon(Icons.lock_reset, size: 48, color: Color(0xFF0B132B)),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      currentStep == 0 ? "Password Recovery" : currentStep == 1 ? "Verify OTP" : "New Password",
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.playfairDisplay(fontSize: 34, fontWeight: FontWeight.bold, color: const Color(0xFF0B132B)),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      currentStep == 0 ? "Enter your registered email to receive a secure recovery link." 
-                      : currentStep == 1 ? "Enter the 6-digit OTP sent to your email." 
-                      : "Create a new secure password.",
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(fontSize: 16, color: Colors.black54, height: 1.6),
-                    ),
-                    const SizedBox(height: 28),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(22),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8)],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (currentStep == 0) ...[
-                            Text("PROFESSIONAL EMAIL ADDRESS", style: GoogleFonts.inter(fontSize: 13, letterSpacing: 1.5, fontWeight: FontWeight.w600, color: const Color(0xFF0B132B))),
-                            const SizedBox(height: 12),
-                            buildField(hint: "name@firm.com", controller: emailController, icon: Icons.email_outlined, type: TextInputType.emailAddress),
-                          ] else if (currentStep == 1) ...[
-                            Text("ONE-TIME PASSWORD", style: GoogleFonts.inter(fontSize: 13, letterSpacing: 1.5, fontWeight: FontWeight.w600, color: const Color(0xFF0B132B))),
-                            const SizedBox(height: 12),
-                            buildField(hint: "123456", controller: otpController, icon: Icons.pin, type: TextInputType.number),
-                          ] else ...[
-                            Text("NEW PASSWORD", style: GoogleFonts.inter(fontSize: 13, letterSpacing: 1.5, fontWeight: FontWeight.w600, color: const Color(0xFF0B132B))),
-                            const SizedBox(height: 12),
-                            buildField(hint: "••••••••", controller: passwordController, isPassword: true),
-                            const SizedBox(height: 8),
-                            Text("Must be 8+ chars with uppercase, lowercase, number & special char.", style: GoogleFonts.inter(fontSize: 11, color: Colors.black54)),
-                            const SizedBox(height: 16),
-                            Text("CONFIRM PASSWORD", style: GoogleFonts.inter(fontSize: 13, letterSpacing: 1.5, fontWeight: FontWeight.w600, color: const Color(0xFF0B132B))),
-                            const SizedBox(height: 12),
-                            buildField(hint: "••••••••", controller: confirmController, isPassword: true),
-                          ],
-                          const SizedBox(height: 22),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 55,
-                            child: ElevatedButton(
-                              onPressed: isLoading ? null : (currentStep == 0 ? sendRecovery : currentStep == 1 ? verifyOtp : resetPassword),
-                              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF001A3A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                              child: isLoading
-                                  ? const CircularProgressIndicator(color: Colors.white)
-                                  : Text(
-                                      currentStep == 0 ? "SEND RECOVERY LINK →" : currentStep == 1 ? "VERIFY OTP →" : "RESET PASSWORD →",
-                                      style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
-                                    ),
-                            ),
+                child: Center(
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 500),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(color: const Color(0xFFEAF0FF), borderRadius: BorderRadius.circular(20)),
+                          child: const Icon(Icons.lock_reset, size: 48, color: Color(0xFF0B132B)),
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          currentStep == 0 ? "Password Recovery" : currentStep == 1 ? "Verify OTP" : "New Password",
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.playfairDisplay(fontSize: 34, fontWeight: FontWeight.bold, color: const Color(0xFF0B132B)),
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
+                          currentStep == 0 ? "Enter your registered email to receive an OTP code." 
+                          : currentStep == 1 ? "Enter the 6-digit OTP sent to your email." 
+                          : "Create a new secure password.",
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(fontSize: 16, color: Colors.black54, height: 1.6),
+                        ),
+                        const SizedBox(height: 28),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(22),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8)],
                           ),
-                          const SizedBox(height: 24),
-                          const Divider(),
-                          const SizedBox(height: 16),
-                          Center(
-                            child: GestureDetector(
-                              onTap: () {
-                                if (currentStep > 0) {
-                                  setState(() => currentStep--);
-                                } else {
-                                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const SignInScreen()));
-                                }
-                              },
-                              child: Text(
-                                currentStep > 0 ? "← Back" : "← Back to secure login",
-                                style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: const Color(0xFF0B132B)),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (currentStep == 0) ...[
+                                Text("PROFESSIONAL EMAIL ADDRESS", style: GoogleFonts.inter(fontSize: 13, letterSpacing: 1.5, fontWeight: FontWeight.w600, color: const Color(0xFF0B132B))),
+                                const SizedBox(height: 12),
+                                buildField(hint: "name@firm.com", controller: emailController, icon: Icons.email_outlined, type: TextInputType.emailAddress),
+                              ] else if (currentStep == 1) ...[
+                                Text("ONE-TIME PASSWORD", style: GoogleFonts.inter(fontSize: 13, letterSpacing: 1.5, fontWeight: FontWeight.w600, color: const Color(0xFF0B132B))),
+                                const SizedBox(height: 12),
+                                buildField(hint: "123456", controller: otpController, icon: Icons.pin, type: TextInputType.number),
+                              ] else ...[
+                                Text("NEW PASSWORD", style: GoogleFonts.inter(fontSize: 13, letterSpacing: 1.5, fontWeight: FontWeight.w600, color: const Color(0xFF0B132B))),
+                                const SizedBox(height: 12),
+                                buildField(hint: "••••••••", controller: passwordController, isPassword: true),
+                                const SizedBox(height: 8),
+                                Text("Must be 8+ chars with uppercase, lowercase, number & special char.", style: GoogleFonts.inter(fontSize: 11, color: Colors.black54)),
+                                const SizedBox(height: 16),
+                                Text("CONFIRM PASSWORD", style: GoogleFonts.inter(fontSize: 13, letterSpacing: 1.5, fontWeight: FontWeight.w600, color: const Color(0xFF0B132B))),
+                                const SizedBox(height: 12),
+                                buildField(hint: "••••••••", controller: confirmController, isPassword: true),
+                              ],
+                              const SizedBox(height: 22),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 55,
+                                child: ElevatedButton(
+                                  onPressed: isLoading ? null : (currentStep == 0 ? sendRecovery : currentStep == 1 ? verifyOtp : resetPassword),
+                                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF001A3A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                                  child: isLoading
+                                      ? const CircularProgressIndicator(color: Colors.white)
+                                      : Text(
+                                          currentStep == 0 ? "SEND OTP →" : currentStep == 1 ? "VERIFY OTP →" : "RESET PASSWORD →",
+                                          style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+                                        ),
+                                ),
                               ),
-                            ),
+                              const SizedBox(height: 24),
+                              const Divider(),
+                              const SizedBox(height: 16),
+                              Center(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    if (currentStep > 0) {
+                                      setState(() => currentStep--);
+                                    } else {
+                                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const SignInScreen()));
+                                    }
+                                  },
+                                  child: Text(
+                                    currentStep > 0 ? "← Back" : "← Back to secure login",
+                                    style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: const Color(0xFF0B132B)),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),

@@ -1,24 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../config/api_config.dart';
 import 'ai_chat.dart';
 import 'appointments.dart';
-import 'upload_documents.dart';
 import 'my_cases.dart';
-import 'billing.dart';
-import 'case_submission.dart';
 import 'edit_profile.dart';
 import 'domestic_violence_flow.dart';
-import 'land_fraud_flow.dart';
-import 'cyber_crime_flow.dart';
-import 'traffic_issue_flow.dart';
-import 'women_safety_flow.dart';
-import 'employee_rights_flow.dart';
-import 'tenant_issue_flow.dart';
-import 'consumer_complaint_flow.dart';
-import 'student_issue_flow.dart';
-import 'accident_claim_flow.dart';
 import '../screens/signin_screen.dart';
+import '../widgets/web_layout.dart';
 
 class ClientDashboard extends StatefulWidget {
   const ClientDashboard({super.key});
@@ -120,18 +112,180 @@ class _ClientHomePageState extends State<ClientHomePage> {
   String searchQuery = "";
 
   final List<Map<String, dynamic>> categories = [
-    {"name": "Domestic Violence", "icon": Icons.family_restroom, "color": const Color(0xFFE57373)},
-    {"name": "Land Dispute", "icon": Icons.landscape, "color": const Color(0xFF81C784)},
-    {"name": "Cyber Crime", "icon": Icons.computer, "color": const Color(0xFF64B5F6)},
-    {"name": "Employee Rights", "icon": Icons.work_outline, "color": const Color(0xFF7986CB)},
-    {"name": "Tenant Issue", "icon": Icons.house_outlined, "color": const Color(0xFFA1887F)},
-    {"name": "Consumer Complaint", "icon": Icons.shopping_bag_outlined, "color": const Color(0xFF4DB6AC)},
+    {"name": "Upload Your case details", "icon": Icons.family_restroom, "color": const Color(0xFFE57373)},
   ];
+
+  int _unreadNotifCount = 0;
 
   @override
   void initState() {
     super.initState();
     _loadUser();
+    _fetchUnreadCount();
+  }
+
+  Future<void> _fetchUnreadCount() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final email = prefs.getString('email') ?? '';
+      final res = await http.get(Uri.parse('${ApiConfig.baseUrl}/get-notifications?email=$email'));
+      if (res.statusCode == 200) {
+        final List<dynamic> notifs = json.decode(res.body);
+        final unread = notifs.where((n) => n['is_read'] == false).length;
+        if (mounted) {
+          setState(() {
+            _unreadNotifCount = unread;
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _showNotificationCenter(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('email') ?? '';
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return FutureBuilder<http.Response>(
+              future: http.get(Uri.parse('${ApiConfig.baseUrl}/get-notifications?email=$email')),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Container(
+                    height: 300,
+                    alignment: Alignment.center,
+                    child: const CircularProgressIndicator(),
+                  );
+                }
+
+                List<dynamic> notifs = [];
+                if (snapshot.hasData && snapshot.data!.statusCode == 200) {
+                  try {
+                    notifs = json.decode(snapshot.data!.body);
+                  } catch (_) {}
+                }
+
+                return DraggableScrollableSheet(
+                  expand: false,
+                  initialChildSize: 0.65,
+                  maxChildSize: 0.88,
+                  minChildSize: 0.4,
+                  builder: (_, scrollController) {
+                    return Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Center(
+                            child: Container(
+                              width: 40, height: 4,
+                              decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              const Icon(Icons.notifications_active, color: Color(0xFF0B132B)),
+                              const SizedBox(width: 10),
+                              Text("Notifications", style: GoogleFonts.playfairDisplay(fontSize: 22, fontWeight: FontWeight.bold, color: const Color(0xFF0B132B))),
+                              const Spacer(),
+                              if (notifs.any((n) => n['is_read'] == false))
+                                TextButton(
+                                  onPressed: () async {
+                                    await http.post(
+                                      Uri.parse('${ApiConfig.baseUrl}/mark-notifications-read'),
+                                      headers: {"Content-Type": "application/json"},
+                                      body: jsonEncode({"email": email}),
+                                    );
+                                    setModalState(() {});
+                                    _fetchUnreadCount();
+                                  },
+                                  child: Text("Mark all read", style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blue)),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text("Real-time updates from police officers and legal advocates.", style: GoogleFonts.inter(fontSize: 12, color: Colors.black54)),
+                          const SizedBox(height: 16),
+                          Expanded(
+                            child: notifs.isEmpty
+                                ? Center(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.notifications_off_outlined, size: 48, color: Colors.grey.shade300),
+                                        const SizedBox(height: 12),
+                                        Text("No notifications yet", style: GoogleFonts.inter(color: Colors.black45)),
+                                      ],
+                                    ),
+                                  )
+                                : ListView.separated(
+                                    controller: scrollController,
+                                    itemCount: notifs.length,
+                                    separatorBuilder: (_, __) => const Divider(),
+                                    itemBuilder: (context, index) {
+                                      final n = notifs[index];
+                                      final type = n['type'] ?? 'info';
+                                      final isRead = n['is_read'] ?? false;
+                                      final timeStr = n['created_at'] != null ? n['created_at'].toString().split('T')[0] : '';
+
+                                      Color iconColor = Colors.blue;
+                                      IconData iconData = Icons.info;
+                                      if (type == 'accept') {
+                                        iconColor = Colors.green;
+                                        iconData = Icons.check_circle;
+                                      } else if (type == 'decline') {
+                                        iconColor = Colors.red;
+                                        iconData = Icons.cancel;
+                                      }
+
+                                      return Container(
+                                        padding: const EdgeInsets.symmetric(vertical: 8),
+                                        color: isRead ? Colors.transparent : Colors.blue.withOpacity(0.04),
+                                        child: ListTile(
+                                          leading: CircleAvatar(
+                                            backgroundColor: iconColor.withOpacity(0.1),
+                                            child: Icon(iconData, color: iconColor),
+                                          ),
+                                          title: Text(
+                                            n['title'] ?? 'Case Update',
+                                            style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14, color: const Color(0xFF0B132B)),
+                                          ),
+                                          subtitle: Padding(
+                                            padding: const EdgeInsets.only(top: 4),
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(n['message'] ?? '', style: GoogleFonts.inter(fontSize: 12, color: Colors.black87, height: 1.4)),
+                                                const SizedBox(height: 4),
+                                                Text(timeStr, style: GoogleFonts.inter(fontSize: 10, color: Colors.black45)),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+          },
+        );
+      },
+    );
   }
 
   Future<void> _loadUser() async {
@@ -152,93 +306,25 @@ class _ClientHomePageState extends State<ClientHomePage> {
   }
 
   void _navigateToUpload(String category) {
-    if (category == "Domestic Violence") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const DomesticViolenceFlowScreen(),
-        ),
-      );
-    } else if (category == "Land Dispute") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const LandFraudFlowScreen(),
-        ),
-      );
-    } else if (category == "Cyber Crime") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const CyberCrimeFlowScreen(),
-        ),
-      );
-    } else if (category == "Traffic Issue" || category == "Accident Claim") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const TrafficIssueFlowScreen(),
-        ),
-      );
-    } else if (category == "Women Safety") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const WomenSafetyFlowScreen(),
-        ),
-      );
-    } else if (category == "Employee Rights") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const EmployeeRightsFlowScreen(),
-        ),
-      );
-    } else if (category == "Tenant Issue") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const TenantIssueFlowScreen(),
-        ),
-      );
-    } else if (category == "Consumer Complaint") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const ConsumerComplaintFlowScreen(),
-        ),
-      );
-    } else if (category == "Student Issues") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const StudentIssueFlowScreen(),
-        ),
-      );
-    } else if (category == "Accident Claim") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const AccidentClaimFlowScreen(),
-        ),
-      );
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => UploadDocumentsScreen(category: category),
-        ),
-      );
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const DomesticViolenceFlowScreen(),
+      ),
+    );
   }
+
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        child: WebLayout(
+          maxWidth: 1200,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -256,6 +342,34 @@ class _ClientHomePageState extends State<ClientHomePage> {
                     ),
                   ),
                   const Spacer(),
+                  Stack(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.notifications_outlined, color: Color(0xFF0B132B), size: 24),
+                        onPressed: () async {
+                          await _showNotificationCenter(context);
+                          _fetchUnreadCount();
+                        },
+                      ),
+                      if (_unreadNotifCount > 0)
+                        Positioned(
+                          right: 6,
+                          top: 6,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text(
+                              "$_unreadNotifCount",
+                              style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(width: 8),
                   PopupMenuButton<String>(
                     onSelected: (value) async {
                       if (value == 'logout') {
@@ -411,16 +525,15 @@ class _ClientHomePageState extends State<ClientHomePage> {
                           ],
                         ),
                       ),
-                      const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 16),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 16),
 
               // Categories Header
               Text(
-                "Legal Categories",
+                "Legal Cases",
                 style: GoogleFonts.playfairDisplay(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -452,69 +565,80 @@ class _ClientHomePageState extends State<ClientHomePage> {
                     );
                   }
 
+                  final double screenWidth = MediaQuery.of(context).size.width;
+                  final int crossCount = filteredCategories.length == 1
+                      ? 1
+                      : (screenWidth > 900 ? 4 : (screenWidth > 600 ? 3 : 2));
+                  final double aspectRatio = filteredCategories.length == 1
+                      ? (screenWidth > 600 ? 4.5 : 2.8)
+                      : (screenWidth > 900 ? 2.2 : (screenWidth > 600 ? 1.8 : 1.4));
+
                   return GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossCount,
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
-                      childAspectRatio: 1.1,
+                      childAspectRatio: aspectRatio,
                     ),
                     itemCount: filteredCategories.length,
                     itemBuilder: (context, index) {
                       final cat = filteredCategories[index];
-                  return GestureDetector(
-                    onTap: () => _navigateToUpload(cat["name"]),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.shade100),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.03),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                      return GestureDetector(
+                        onTap: () => _navigateToUpload(cat["name"]),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.grey.shade100),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.03),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: (cat["color"] as Color).withOpacity(0.15),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              cat["icon"] as IconData,
-                              color: cat["color"] as Color,
-                              size: 28,
-                            ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: (cat["color"] as Color).withOpacity(0.15),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  cat["icon"] as IconData,
+                                  color: cat["color"] as Color,
+                                  size: 32,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Text(
+                                  cat["name"],
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF0B132B),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 12),
-                          Text(
-                            cat["name"],
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFF0B132B),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+                        ),
+                      );
+                    },
                   );
                 },
               ),
               const SizedBox(height: 80),
             ],
           ),
+        ),
         ),
       ),
     );
@@ -1000,73 +1124,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
                 ),
               ),
 
-              const SizedBox(height: 20),
 
-              // Security & Privacy
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20),
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade100),
-                  boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.gpp_good, size: 16, color: Color(0xFF0B132B)),
-                        const SizedBox(width: 8),
-                        Text(
-                          "SECURITY & PRIVACY",
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
-                            color: const Color(0xFF0B132B),
-                          ),
-                        ),
-                        const Spacer(),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF7C873),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            "ENCRYPTED",
-                            style: GoogleFonts.inter(
-                              fontSize: 8,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF8A6A00),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    securityTile(
-                      Icons.vpn_key,
-                      "Manage Encryption",
-                      "Update PGP keys and end-to-end encryption protocols.",
-                    ),
-                    securityTile(
-                      Icons.fingerprint,
-                      "Biometric Login",
-                      "Configure FaceID or TouchID for rapid secure access.",
-                      hasActiveBadge: true,
-                    ),
-                    securityTile(
-                      Icons.history,
-                      "Access Log",
-                      "Review recent login attempts and session locations.",
-                    ),
-                  ],
-                ),
-              ),
 
               const SizedBox(height: 40),
 

@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import '../widgets/web_layout.dart';
 
 class MyCasesScreen extends StatefulWidget {
   const MyCasesScreen({super.key});
@@ -33,8 +34,11 @@ class _MyCasesScreenState extends State<MyCasesScreen> {
       final response = await http.get(Uri.parse('${ApiConfig.baseUrl}/get-my-cases?email=$email'));
 
       if (response.statusCode == 200) {
+        final List<dynamic> cases = json.decode(response.body);
+        // Default sort: Recent cases on top
+        cases.sort((a, b) => (b['created_at'] ?? '').toString().compareTo((a['created_at'] ?? '').toString()));
         setState(() {
-          _cases = json.decode(response.body);
+          _cases = cases;
           _isLoading = false;
         });
       } else {
@@ -45,12 +49,81 @@ class _MyCasesScreenState extends State<MyCasesScreen> {
     }
   }
 
+  void _showDateSummaryDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Row(
+            children: [
+              const Icon(Icons.event_note, color: Color(0xFF0B132B)),
+              const SizedBox(width: 8),
+              Text(
+                "Cases Date Details",
+                style: GoogleFonts.playfairDisplay(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: _cases.isEmpty
+                ? Text("No cases available.", style: GoogleFonts.inter())
+                : ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: _cases.length,
+                    separatorBuilder: (_, __) => const Divider(),
+                    itemBuilder: (context, index) {
+                      final c = _cases[index];
+                      final dateStr = c['created_at'] != null ? c['created_at'].toString().split('T')[0] : 'N/A';
+                      final timeStr = c['created_at'] != null && c['created_at'].toString().contains('T')
+                          ? c['created_at'].toString().split('T')[1].substring(0, 5)
+                          : '';
+                      return ListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(
+                          "${c['type'] ?? 'Case'} (${c['case_id']})",
+                          style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13),
+                        ),
+                        subtitle: Text(
+                          "Submitted Date: $dateStr ${timeStr.isNotEmpty ? 'at $timeStr' : ''}",
+                          style: GoogleFonts.inter(fontSize: 11, color: Colors.black54),
+                        ),
+                        trailing: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            c['status'] ?? 'Submitted',
+                            style: GoogleFonts.inter(fontSize: 10, color: Colors.blue, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Close", style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: const Color(0xFF0B132B))),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FE),
       body: SafeArea(
-        child: RefreshIndicator(
+        child: WebLayout(
+          maxWidth: 1200,
+          child: RefreshIndicator(
           onRefresh: _fetchCases,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -73,7 +146,61 @@ class _MyCasesScreenState extends State<MyCasesScreen> {
                         ),
                       ),
                       const Spacer(),
-                      const Icon(Icons.menu, color: Color(0xFF0B132B)),
+                      PopupMenuButton<String>(
+                        icon: const Icon(Icons.menu, color: Color(0xFF0B132B)),
+                        tooltip: "Sort & Date Details",
+                        onSelected: (value) {
+                          if (value == 'recent') {
+                            setState(() {
+                              _cases.sort((a, b) => (b['created_at'] ?? '').toString().compareTo((a['created_at'] ?? '').toString()));
+                            });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Sorted: Recent cases on top")),
+                            );
+                          } else if (value == 'oldest') {
+                            setState(() {
+                              _cases.sort((a, b) => (a['created_at'] ?? '').toString().compareTo((b['created_at'] ?? '').toString()));
+                            });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Sorted: Oldest cases first")),
+                            );
+                          } else if (value == 'date_summary') {
+                            _showDateSummaryDialog();
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'recent',
+                            child: Row(
+                              children: [
+                                Icon(Icons.arrow_upward, size: 18, color: Color(0xFF0B132B)),
+                                SizedBox(width: 8),
+                                Text("Recent Cases First (Top)"),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'oldest',
+                            child: Row(
+                              children: [
+                                Icon(Icons.arrow_downward, size: 18, color: Color(0xFF0B132B)),
+                                SizedBox(width: 8),
+                                Text("Oldest Cases First"),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'date_summary',
+                            child: Row(
+                              children: [
+                                Icon(Icons.calendar_month, size: 18, color: Color(0xFF0B132B)),
+                                SizedBox(width: 8),
+                                Text("View Case Date Details"),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -128,6 +255,7 @@ class _MyCasesScreenState extends State<MyCasesScreen> {
               ],
             ),
           ),
+        ),
         ),
       ),
     );
@@ -239,9 +367,22 @@ class _MyCasesScreenState extends State<MyCasesScreen> {
   }
 }
 
-class CaseDetailsScreen extends StatelessWidget {
+class CaseDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> caseData;
   const CaseDetailsScreen({super.key, required this.caseData});
+
+  @override
+  State<CaseDetailsScreen> createState() => _CaseDetailsScreenState();
+}
+
+class _CaseDetailsScreenState extends State<CaseDetailsScreen> {
+  late Map<String, dynamic> _caseData;
+
+  @override
+  void initState() {
+    super.initState();
+    _caseData = Map<String, dynamic>.from(widget.caseData);
+  }
 
   IconData _fileIcon(String filename) {
     final lower = filename.toLowerCase();
@@ -263,13 +404,169 @@ class CaseDetailsScreen extends StatelessWidget {
     return "${ApiConfig.baseUrl}/uploads/$cleanPath";
   }
 
+  void _showAssignOfficialModal(BuildContext context, String role) async {
+    final isPolice = role == 'police';
+    final String endpoint = isPolice ? '/get-police' : '/get-lawyers';
+    final String title = isPolice ? 'Select Registered Police Officer / Station' : 'Select Registered Advocate / Lawyer';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return FutureBuilder<http.Response>(
+          future: http.get(Uri.parse('${ApiConfig.baseUrl}$endpoint')),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Container(
+                height: 300,
+                alignment: Alignment.center,
+                child: const CircularProgressIndicator(),
+              );
+            }
+            if (!snapshot.hasData || snapshot.data!.statusCode != 200) {
+              return Container(
+                height: 250,
+                padding: const EdgeInsets.all(24),
+                child: Center(
+                  child: Text("Unable to load registered ${isPolice ? 'police officers' : 'lawyers'}. Please check server connection.",
+                      textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.red)),
+                ),
+              );
+            }
+
+            final List<dynamic> officials = json.decode(snapshot.data!.body);
+
+            return DraggableScrollableSheet(
+              expand: false,
+              initialChildSize: 0.6,
+              maxChildSize: 0.85,
+              minChildSize: 0.4,
+              builder: (_, scrollController) {
+                return Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 40, height: 4,
+                          decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(title, style: GoogleFonts.playfairDisplay(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF0B132B))),
+                      const SizedBox(height: 4),
+                      Text(
+                        "Submit case ${_caseData['case_id']} to a verified ${isPolice ? 'police department' : 'legal advocate'}.",
+                        style: GoogleFonts.inter(fontSize: 12, color: Colors.black54),
+                      ),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: officials.isEmpty
+                            ? Center(child: Text("No registered ${isPolice ? 'police officers' : 'lawyers'} found.", style: GoogleFonts.inter(color: Colors.black45)))
+                            : ListView.separated(
+                                controller: scrollController,
+                                itemCount: officials.length,
+                                separatorBuilder: (_, __) => const Divider(),
+                                itemBuilder: (context, index) {
+                                  final official = officials[index];
+                                  final name = official['name'] ?? 'Official';
+                                  final email = official['email'] ?? '';
+                                  final phone = official['phone'] ?? 'N/A';
+
+                                  return ListTile(
+                                    leading: CircleAvatar(
+                                      backgroundColor: isPolice ? Colors.indigo.shade100 : Colors.amber.shade100,
+                                      child: Icon(isPolice ? Icons.local_police : Icons.gavel, color: isPolice ? Colors.indigo : const Color(0xFF0B132B)),
+                                    ),
+                                    title: Text(name, style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 15)),
+                                    subtitle: Text("$email • Tel: $phone", style: GoogleFonts.inter(fontSize: 12, color: Colors.black54)),
+                                    trailing: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: isPolice ? Colors.indigo : const Color(0xFF0B132B),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                      ),
+                                      onPressed: () async {
+                                        Navigator.pop(ctx);
+                                        await _assignCaseToOfficial(role, email, name);
+                                      },
+                                      child: Text("Submit Case", style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _assignCaseToOfficial(String role, String officialEmail, String officialName) async {
+    try {
+      final caseId = _caseData['case_id'];
+      final res = await http.post(
+        Uri.parse('${ApiConfig.baseUrl}/assign-case'),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "case_id": caseId,
+          "assign_to": role,
+          "email": officialEmail,
+        }),
+      );
+
+      if (res.statusCode == 200) {
+        setState(() {
+          if (role == 'police') {
+            _caseData['assigned_police'] = officialEmail;
+            _caseData['handling_status'] = 'Police Assigned';
+          } else {
+            _caseData['assigned_lawyer'] = officialEmail;
+            _caseData['handling_status'] = 'Lawyer Assigned';
+          }
+          _caseData['status'] = 'Assigned';
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Case $caseId submitted successfully to $officialName ($officialEmail)"),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Failed to submit case. Please try again.")),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error submitting case: $e")),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final analysis = caseData['analysis'] ?? {};
-    final details = caseData['details'] ?? {};
-    final status = caseData['status'] ?? 'Submitted';
-    final type = caseData['type'] ?? 'Legal Case';
-    final caseId = caseData['case_id'] ?? 'N/A';
+    final analysis = _caseData['analysis'] ?? {};
+    final details = _caseData['details'] ?? {};
+    final status = _caseData['status'] ?? 'Submitted';
+    final type = _caseData['type'] ?? 'Legal Case';
+    final caseId = _caseData['case_id'] ?? 'N/A';
 
     final List<String> stages = ['Submitted', 'Under Review', 'Action Taken', 'Completed'];
     int currentStageIndex = stages.indexOf(status);
@@ -293,7 +590,7 @@ class CaseDetailsScreen extends StatelessWidget {
             Text("ID: $caseId", style: GoogleFonts.inter(color: Colors.black45)),
             const SizedBox(height: 16),
             
-            if (caseData['handling_status'] != null)
+            if (_caseData['handling_status'] != null)
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.only(bottom: 24),
@@ -313,13 +610,129 @@ class CaseDetailsScreen extends StatelessWidget {
                         children: [
                           Text("Handling Status", style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.blue)),
                           const SizedBox(height: 2),
-                          Text(caseData['handling_status'], style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFF0B132B))),
+                          Text(_caseData['handling_status'], style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFF0B132B))),
                         ],
                       ),
                     ),
                   ],
                 ),
               ),
+
+            // Submit Case to Registered Officials (Police & Lawyer) Card
+            Container(
+              margin: const EdgeInsets.only(bottom: 24),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey.shade200),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10)],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.assignment_ind, color: Color(0xFF0B132B), size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        "SUBMIT CASE TO OFFICIALS",
+                        style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2, color: const Color(0xFF0B132B)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Submit your case directly to registered police stations or legal advocates to begin official investigation and legal representation.",
+                    style: GoogleFonts.inter(fontSize: 12, color: Colors.black54, height: 1.4),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Status summary of assignments
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.local_police, size: 16, color: Colors.indigo),
+                            const SizedBox(width: 8),
+                            Text("Police Officer / Station: ", style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
+                            Expanded(
+                              child: Text(
+                                _caseData['assigned_police'] ?? "Not Submitted Yet",
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: _caseData['assigned_police'] != null ? Colors.indigo : Colors.black45,
+                                  fontWeight: _caseData['assigned_police'] != null ? FontWeight.bold : FontWeight.normal,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Divider(height: 16),
+                        Row(
+                          children: [
+                            const Icon(Icons.gavel, size: 16, color: Color(0xFF0B132B)),
+                            const SizedBox(width: 8),
+                            Text("Assigned Advocate / Lawyer: ", style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
+                            Expanded(
+                              child: Text(
+                                _caseData['assigned_lawyer'] ?? "Not Submitted Yet",
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: _caseData['assigned_lawyer'] != null ? const Color(0xFF0B132B) : Colors.black45,
+                                  fontWeight: _caseData['assigned_lawyer'] != null ? FontWeight.bold : FontWeight.normal,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Action buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _showAssignOfficialModal(context, 'police'),
+                          icon: const Icon(Icons.local_police, size: 16, color: Colors.indigo),
+                          label: Text("Submit to Police", style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.indigo)),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.indigo),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () => _showAssignOfficialModal(context, 'lawyer'),
+                          icon: const Icon(Icons.gavel, size: 16, color: Colors.white),
+                          label: Text("Submit to Lawyer", style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0B132B),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
               
             // Incident Details & Uploaded Files
             Text("INCIDENT DETAILS", style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Colors.black45)),
@@ -468,7 +881,7 @@ class CaseDetailsScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(stages[index], style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: isCompleted ? Colors.black87 : Colors.black26)),
-                      Text(isCompleted ? "Updated on ${caseData['created_at']?.toString().split('T')[0] ?? 'Today'}" : "Pending", style: GoogleFonts.inter(fontSize: 12, color: Colors.black45)),
+                      Text(isCompleted ? "Updated on ${_caseData['created_at']?.toString().split('T')[0] ?? 'Today'}" : "Pending", style: GoogleFonts.inter(fontSize: 12, color: Colors.black45)),
                     ],
                   ),
                 ],
@@ -521,7 +934,7 @@ class CaseDetailsScreen extends StatelessWidget {
                           pageFormat: PdfPageFormat.a4,
                           margin: const pw.EdgeInsets.all(32),
                           build: (pw.Context ctx) => [
-                            pw.Text('LexisAI — Domestic Violence Complaint',
+                            pw.Text('LexisAI — Formal Complaint',
                                 style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
                             pw.SizedBox(height: 8),
                             if (caseId.isNotEmpty)

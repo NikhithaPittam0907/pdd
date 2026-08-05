@@ -54,10 +54,23 @@ class _AIChatScreenState extends State<AIChatScreen> {
       setState(() {
         _messages.add({
           "role": "model", 
-          "text": "Hello! I am **LexisCore AI**, your specialized legal assistant.\n\nI can help you understand:\n* Legal procedures & documentation\n* Case strategy & risk analysis\n* Your rights & regulations\n\nHow can I assist you today?"
+          "text": "Hello! 👋 I am **LexisCore AI**, your intelligent legal assistant powered by Gemini.\n\nHow can I assist you legally today? Tap any of the quick topics below or ask your question directly!"
         });
       });
     }
+  }
+
+  final List<String> _suggestedQuestions = const [
+    "How do I file a DV complaint under BNS 2023?",
+    "What is a Zero FIR & how to register it?",
+    "How to claim accident compensation under law?",
+    "What key documents are required for an FIR?",
+    "How to get free legal aid in India?",
+  ];
+
+  Future<void> _sendSuggestedQuestion(String text) async {
+    _controller.text = text;
+    await _sendMessage();
   }
 
   void _scrollToBottom() {
@@ -308,64 +321,95 @@ class _AIChatScreenState extends State<AIChatScreen> {
   }
 
   Widget _buildInputArea() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            offset: const Offset(0, -4),
-            blurRadius: 10,
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Row(
-          children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(30),
-                  border: Border.all(color: Colors.grey.shade300),
-                ),
-                child: TextField(
-                  controller: _controller,
-                  textCapitalization: TextCapitalization.sentences,
-                  style: GoogleFonts.inter(fontSize: 14),
-                  decoration: InputDecoration(
-                    hintText: "Ask about your legal rights...",
-                    hintStyle: GoogleFonts.inter(color: Colors.grey, fontSize: 14),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    border: InputBorder.none,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          height: 38,
+          margin: const EdgeInsets.only(top: 4, bottom: 4),
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: _suggestedQuestions.length,
+            itemBuilder: (context, index) {
+              final q = _suggestedQuestions[index];
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: ActionChip(
+                  elevation: 0,
+                  backgroundColor: Colors.white,
+                  side: BorderSide(color: Colors.grey.shade300),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  label: Text(
+                    q,
+                    style: GoogleFonts.inter(fontSize: 12, color: primaryColor, fontWeight: FontWeight.w500),
                   ),
-                  onSubmitted: (_) => _sendMessage(),
+                  onPressed: () => _sendSuggestedQuestion(q),
                 ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            GestureDetector(
-              onTap: _sendMessage,
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: primaryColor,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: primaryColor.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
-              ),
-            ),
-          ],
+              );
+            },
+          ),
         ),
-      ),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                offset: const Offset(0, -4),
+                blurRadius: 10,
+              ),
+            ],
+          ),
+          child: SafeArea(
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: TextField(
+                      controller: _controller,
+                      textCapitalization: TextCapitalization.sentences,
+                      style: GoogleFonts.inter(fontSize: 14),
+                      decoration: InputDecoration(
+                        hintText: "Ask about your legal rights...",
+                        hintStyle: GoogleFonts.inter(color: Colors.grey, fontSize: 14),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        border: InputBorder.none,
+                      ),
+                      onSubmitted: (_) => _sendMessage(),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                GestureDetector(
+                  onTap: _sendMessage,
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: primaryColor,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: primaryColor.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

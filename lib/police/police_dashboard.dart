@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../config/api_config.dart';
 import '../screens/signin_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../widgets/web_layout.dart';
 
 class PoliceDashboard extends StatefulWidget {
   const PoliceDashboard({super.key});
@@ -26,10 +27,18 @@ class _PoliceDashboardState extends State<PoliceDashboard> {
 
   Future<void> _fetchPoliceCases() async {
     try {
-      final response = await http.get(Uri.parse('${ApiConfig.baseUrl}/police/cases'));
+      final prefs = await SharedPreferences.getInstance();
+      final email = prefs.getString('email') ?? '';
+      final response = await http.get(Uri.parse('${ApiConfig.baseUrl}/police/cases?email=$email'));
       if (response.statusCode == 200) {
+        final List<dynamic> cases = jsonDecode(response.body);
+        cases.sort((a, b) {
+          final aDate = DateTime.tryParse(a['created_at'] ?? '') ?? DateTime(1970);
+          final bDate = DateTime.tryParse(b['created_at'] ?? '') ?? DateTime(1970);
+          return bDate.compareTo(aDate);
+        });
         setState(() {
-          policeCases = jsonDecode(response.body);
+          policeCases = cases;
           isLoading = false;
         });
       } else {
@@ -149,7 +158,9 @@ class _PoliceDashboardState extends State<PoliceDashboard> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FB),
       body: SafeArea(
-        child: Column(
+        child: WebLayout(
+          maxWidth: 1200,
+          child: Column(
           children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -236,6 +247,7 @@ class _PoliceDashboardState extends State<PoliceDashboard> {
             ),
           ],
         ),
+        ),
       ),
     );
   }
@@ -278,28 +290,39 @@ class _PoliceCaseDetailsScreenState extends State<PoliceCaseDetailsScreen> {
     return Icons.insert_drive_file;
   }
 
-  Future<void> _acceptCase() async {
+  Future<void> _handleCaseAction(String action) async {
     setState(() => isAccepting = true);
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final officialName = prefs.getString('name') ?? '';
+      final officialEmail = prefs.getString('email') ?? '';
+
       final response = await http.post(
         Uri.parse('${ApiConfig.baseUrl}/accept-case'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "case_id": widget.caseData['case_id'],
           "role": "police",
+          "action": action,
+          "official_name": officialName,
+          "official_email": officialEmail,
         }),
       );
 
       if (response.statusCode == 200) {
         if (!mounted) return;
+        final bool isAccept = action == 'accept';
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Case officially accepted.")),
+          SnackBar(
+            content: Text(isAccept ? "Case officially accepted. Client notified." : "Case declined. Client notified."),
+            backgroundColor: isAccept ? Colors.green : Colors.red,
+          ),
         );
         widget.onAccept();
         Navigator.pop(context);
       } else {
         if (!mounted) return;
-        String errMsg = "Failed to accept case.";
+        String errMsg = "Failed to process case.";
         try { errMsg = jsonDecode(response.body)['message'] ?? errMsg; } catch (_) {}
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(errMsg), backgroundColor: Colors.red),
@@ -512,23 +535,39 @@ class _PoliceCaseDetailsScreenState extends State<PoliceCaseDetailsScreen> {
             
             // Action Button
             if (!alreadyAccepted)
-              SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton.icon(
-                  onPressed: isAccepting ? null : _acceptCase,
-                  icon: isAccepting 
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : const Icon(Icons.check_circle_outline, color: Colors.white),
-                  label: Text(
-                    isAccepting ? "Accepting..." : "ACCEPT CASE",
-                    style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: isAccepting ? null : () => _handleCaseAction('decline'),
+                      icon: const Icon(Icons.cancel_outlined, color: Colors.red),
+                      label: Text("DECLINE CASE", style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.red)),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.red),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
                   ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green.shade700,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: isAccepting ? null : () => _handleCaseAction('accept'),
+                      icon: isAccepting 
+                          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                          : const Icon(Icons.check_circle_outline, color: Colors.white),
+                      label: Text(
+                        isAccepting ? "Processing..." : "ACCEPT CASE",
+                        style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green.shade700,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               )
             else
               Container(

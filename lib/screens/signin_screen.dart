@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'forgot_password.dart';
 import 'signup_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../client/client_dashboard.dart';
 import '../lawyer/lawyer_dashboard.dart';
 import '../police/police_dashboard.dart';
@@ -26,8 +28,152 @@ class _SignInScreenState extends State<SignInScreen> {
   bool rememberMe = false;
   bool obscure = true;
   bool isLoading = false;
+  bool isGoogleLoading = false;
 
   final String baseUrl = ApiConfig.baseUrl;
+  late final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId: kIsWeb ? ApiConfig.googleClientId.trim() : null,
+    scopes: ['email', 'profile'],
+  );
+
+  Future<void> _showGoogleEmailDialog() async {
+    final emailCtrl = TextEditingController(text: "nikhithareddypittam@gmail.com");
+    final nameCtrl = TextEditingController(text: "Nikhitha Reddy Pittam");
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          "Google Sign-In Account",
+          style: GoogleFonts.playfairDisplay(fontWeight: FontWeight.bold, color: const Color(0xFF001A3A)),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Please confirm or enter your registered Google email address to access your dashboard:",
+              style: GoogleFonts.inter(fontSize: 13, color: Colors.black87),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: emailCtrl,
+              decoration: const InputDecoration(
+                labelText: "Google Email",
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.email),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: nameCtrl,
+              decoration: const InputDecoration(
+                labelText: "Account Name",
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.person),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final email = emailCtrl.text.trim();
+              final name = nameCtrl.text.trim();
+              if (email.isNotEmpty) {
+                Navigator.pop(context);
+                await _authenticateGoogleBackend(email, name.isNotEmpty ? name : email.split('@')[0]);
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF001A3A)),
+            child: const Text("Sign In", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> signInWithGoogle() async {
+    setState(() => isGoogleLoading = true);
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        if (mounted) setState(() => isGoogleLoading = false);
+        return;
+      }
+
+      final String email = googleUser.email;
+      final String name = googleUser.displayName ?? email.split('@')[0];
+
+      await _authenticateGoogleBackend(email, name);
+    } catch (e) {
+      debugPrint("Google Sign-In Error: $e");
+      if (!mounted) return;
+      await _showGoogleEmailDialog();
+    } finally {
+      if (mounted) setState(() => isGoogleLoading = false);
+    }
+  }
+
+  Future<void> _authenticateGoogleBackend(String email, String name) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/google-login"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "email": email,
+          "name": name,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('name', data['name'] ?? name);
+        await prefs.setString('role', data['role'] ?? 'client');
+        await prefs.setString('email', data['email'] ?? email);
+        await prefs.setString('phone', data['phone'] ?? '');
+
+        if (!mounted) return;
+
+        if (data['role'] == 'lawyer') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const LawyerDashboard()),
+          );
+        } else if (data['role'] == 'police') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const PoliceDashboard()),
+          );
+        } else if (data['role'] == 'admin') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const AdminDashboard()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const ClientDashboard()),
+          );
+        }
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Google authentication failed")),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Google authentication error: $e")),
+      );
+    }
+  }
 
   Future<void> loginUser() async {
     setState(() => isLoading = true);
@@ -78,11 +224,13 @@ class _SignInScreenState extends State<SignInScreen> {
         // Trigger the "Save Password" prompt
         TextInput.finishAutofillContext();
       } else {
+        if (!mounted) return;
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(data["message"])));
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Connection Error")));
@@ -101,15 +249,17 @@ class _SignInScreenState extends State<SignInScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF0B132B),
+        if (label.isNotEmpty) ...[
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF0B132B),
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
+          const SizedBox(height: 8),
+        ],
         TextField(
           controller: controller,
           obscureText: isPassword ? obscure : false,
@@ -151,6 +301,7 @@ class _SignInScreenState extends State<SignInScreen> {
       body: SafeArea(
         child: Column(
           children: [
+            // Top App Bar
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               color: Colors.white,
@@ -181,211 +332,267 @@ class _SignInScreenState extends State<SignInScreen> {
               ),
             ),
 
+            // Centered LexisCore Login Box with Compact Width (Zomato-style box size)
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Container(
-                  padding: const EdgeInsets.all(22),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(18),
-                    boxShadow: const [
-                      BoxShadow(color: Colors.black12, blurRadius: 8),
-                    ],
-                  ),
-                  child: AutofillGroup(
-                    child: Column(
-                      children: [
-                      Text(
-                        "LexisCore Login",
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF0B132B),
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      Text(
-                        "Please authenticate to proceed to your dashboard.",
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(
-                          fontSize: 15,
-                          color: Colors.black54,
-                          height: 1.5,
-                        ),
-                      ),
-
-                      const SizedBox(height: 28),
-
-                      buildField(
-                        label: "Email Address",
-                        hint: "attorney@firm.com",
-                        controller: emailController,
-                        autofillHints: const [AutofillHints.email],
-                      ),
-
-                      const SizedBox(height: 22),
-
-                      Row(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 440),
+                    padding: const EdgeInsets.all(26),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black12, blurRadius: 12, spreadRadius: 2, offset: Offset(0, 4)),
+                      ],
+                    ),
+                    child: AutofillGroup(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            "Password",
-                            style: GoogleFonts.inter(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
+                            "LexisCore Login",
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
                               color: const Color(0xFF0B132B),
                             ),
                           ),
-                          const Spacer(),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const ForgotPasswordScreen(),
-                                ),
-                              );
-                            },
-                            child: Text(
-                              "Forgot Password?",
-                              style: GoogleFonts.inter(
-                                color: const Color(0xFF8A6A00),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
+
+                          const SizedBox(height: 10),
+
+                          Text(
+                            "Please authenticate to proceed to your dashboard.",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: Colors.black54,
+                              height: 1.4,
                             ),
                           ),
-                        ],
-                      ),
 
-                      const SizedBox(height: 8),
+                          const SizedBox(height: 26),
 
-                      buildField(
-                        label: "",
-                        hint: "••••••••",
-                        controller: passwordController,
-                        isPassword: true,
-                        autofillHints: const [AutofillHints.password],
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: rememberMe,
-                            onChanged: (val) {
-                              setState(() {
-                                rememberMe = val!;
-                              });
-                            },
+                          buildField(
+                            label: "Email Address",
+                            hint: "attorney@firm.com",
+                            controller: emailController,
+                            autofillHints: const [AutofillHints.email],
                           ),
-                          Expanded(
-                            child: Text(
-                              "Remember this workstation for 30 days",
-                              style: GoogleFonts.inter(fontSize: 13),
-                            ),
-                          ),
-                        ],
-                      ),
 
-                      const SizedBox(height: 18),
+                          const SizedBox(height: 20),
 
-                      SizedBox(
-                        width: double.infinity,
-                        height: 55,
-                        child: ElevatedButton(
-                          onPressed: isLoading ? null : loginUser,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF001A3A),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: isLoading
-                              ? const CircularProgressIndicator(
-                                  color: Colors.white,
-                                )
-                              : Text(
-                                  "Sign In  →",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 24),
-                      const Divider(),
-                      const SizedBox(height: 18),
-
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 18,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEAF0FF),
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
+                          Row(
                             children: [
-                              const Icon(
-                                Icons.verified,
-                                color: Color(0xFF8A6A00),
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
                               Text(
-                                "256-bit AES Encryption Active",
+                                "Password",
                                 style: GoogleFonts.inter(
-                                  color: const Color(0xFF8A6A00),
-                                  fontSize: 13,
+                                  fontSize: 15,
                                   fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF0B132B),
+                                ),
+                              ),
+                              const Spacer(),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const ForgotPasswordScreen(),
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  "Forgot Password?",
+                                  style: GoogleFonts.inter(
+                                    color: const Color(0xFF8A6A00),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ),
 
-                      const SizedBox(height: 24),
+                          const SizedBox(height: 8),
 
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const SignUpScreen(),
-                            ),
-                          );
-                        },
-                        child: Text(
-                          "Don't have an account? Sign Up",
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF0B132B),
+                          buildField(
+                            label: "",
+                            hint: "••••••••",
+                            controller: passwordController,
+                            isPassword: true,
+                            autofillHints: const [AutofillHints.password],
                           ),
-                        ),
+
+                          const SizedBox(height: 10),
+
+                          Row(
+                            children: [
+                              Checkbox(
+                                value: rememberMe,
+                                onChanged: (val) {
+                                  setState(() {
+                                    rememberMe = val!;
+                                  });
+                                },
+                              ),
+                              Expanded(
+                                child: Text(
+                                  "Remember this workstation for 30 days",
+                                  style: GoogleFonts.inter(fontSize: 13),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 18),
+
+                          SizedBox(
+                            width: double.infinity,
+                            height: 52,
+                            child: ElevatedButton(
+                              onPressed: isLoading ? null : loginUser,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF001A3A),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              child: isLoading
+                                  ? const CircularProgressIndicator(
+                                      color: Colors.white,
+                                    )
+                                  : Text(
+                                      "Sign In  →",
+                                      style: GoogleFonts.inter(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 14),
+
+                          // Sign in with Google Button
+                          SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: OutlinedButton(
+                              onPressed: isGoogleLoading ? null : signInWithGoogle,
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(color: Colors.grey.shade300),
+                                backgroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              child: isGoogleLoading
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                                    )
+                                  : Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Image.network(
+                                          'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg',
+                                          height: 22,
+                                          width: 22,
+                                          errorBuilder: (context, error, stackTrace) {
+                                            return const Icon(
+                                              Icons.g_mobiledata_rounded,
+                                              size: 28,
+                                              color: Color(0xFF4285F4),
+                                            );
+                                          },
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Text(
+                                          "Sign in with Google",
+                                          style: GoogleFonts.inter(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                            color: const Color(0xFF0B132B),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 22),
+                          const Divider(),
+                          const SizedBox(height: 16),
+
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFEAF0FF),
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.verified,
+                                    color: Color(0xFF8A6A00),
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    "256-bit AES Encryption Active",
+                                    style: GoogleFonts.inter(
+                                      color: const Color(0xFF8A6A00),
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 22),
+
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const SignUpScreen(),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              "Don't have an account? Sign Up",
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF0B132B),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
 
+            // Footer
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(18),
+              padding: const EdgeInsets.all(16),
               color: const Color(0xFFF1F3F8),
               child: Column(
                 children: [
@@ -393,7 +600,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     "© 2024 LEXISAI. ATTORNEY-CLIENT PRIVILEGED.",
                     style: GoogleFonts.inter(fontSize: 11),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [

@@ -119,6 +119,10 @@ class CaseAnalysisScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final int crossAxisCount = screenWidth > 900 ? 4 : (screenWidth > 600 ? 3 : 2);
+    final double childAspectRatio = screenWidth > 900 ? 2.0 : (screenWidth > 600 ? 1.6 : 1.2);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FB),
       body: SafeArea(
@@ -198,10 +202,10 @@ class CaseAnalysisScreen extends StatelessWidget {
                     GridView.count(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      crossAxisCount: 2,
+                      crossAxisCount: crossAxisCount,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
-                      childAspectRatio: 1.05,
+                      childAspectRatio: childAspectRatio,
                       children: [
                         statCard("Total Cases", "28", Icons.folder),
                         statCard("Won Cases", "19", Icons.emoji_events),

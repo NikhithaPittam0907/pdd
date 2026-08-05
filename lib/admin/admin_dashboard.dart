@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../config/api_config.dart';
 import '../screens/signin_screen.dart';
+import '../widgets/web_layout.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -108,6 +109,11 @@ class _AdminHomePageState extends State<AdminHomePage> {
       if (usersRes.statusCode == 200 && casesRes.statusCode == 200) {
         final List<dynamic> users = jsonDecode(usersRes.body);
         final List<dynamic> cases = jsonDecode(casesRes.body);
+        cases.sort((a, b) {
+          final aDate = DateTime.tryParse(a['created_at'] ?? '') ?? DateTime(1970);
+          final bDate = DateTime.tryParse(b['created_at'] ?? '') ?? DateTime(1970);
+          return bDate.compareTo(aDate);
+        });
 
         setState(() {
           totalUsers = users.length;
@@ -125,60 +131,443 @@ class _AdminHomePageState extends State<AdminHomePage> {
     }
   }
 
-  Widget statCard(String title, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade100),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          )
+  Future<void> _confirmDeleteCase(String caseId) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          "Delete Case",
+          style: GoogleFonts.playfairDisplay(fontWeight: FontWeight.bold, color: Colors.red.shade900),
+        ),
+        content: Text(
+          "Are you sure you want to permanently delete Case $caseId?\n\nThis will remove the case and all associated evidence/notes from the database and client portal.",
+          style: GoogleFonts.inter(fontSize: 13, color: Colors.black87),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text("Delete Case", style: TextStyle(color: Colors.white)),
+          ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: color.withOpacity(0.12),
-                child: Icon(icon, color: color, size: 20),
+    );
+
+    if (confirm == true) {
+      try {
+        final res = await http.post(
+          Uri.parse('${ApiConfig.baseUrl}/admin/delete-case'),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({"case_id": caseId}),
+        );
+        if (res.statusCode == 200) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Case $caseId deleted successfully."), backgroundColor: Colors.green),
+          );
+          _fetchStats();
+        } else {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Failed to delete case."), backgroundColor: Colors.red),
+          );
+        }
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Network Error while deleting case."), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
+  Widget statCard(String title, String value, IconData icon, Color color, {VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade100),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            )
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: color.withOpacity(0.12),
+                  child: Icon(icon, color: color, size: 18),
+                ),
+                const Icon(Icons.arrow_forward_outlined, color: Colors.grey, size: 14),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              value,
+              style: GoogleFonts.playfairDisplay(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF001A3A),
               ),
-              const Icon(Icons.arrow_forward_outlined, color: Colors.grey, size: 16),
-            ],
-          ),
-          const Spacer(),
-          Text(
-            value,
-            style: GoogleFonts.playfairDisplay(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF001A3A),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: Colors.black54,
+            const SizedBox(height: 2),
+            Text(
+              title,
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Colors.black54,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+
+  void _showRegisteredOfficialsDirectory(BuildContext context, String role) {
+    final isPolice = role == 'police';
+    final endpoint = isPolice ? '/get-police' : '/get-lawyers';
+    final title = isPolice ? 'Registered Police Officers / Stations' : 'Registered Advocates & Lawyers';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return FutureBuilder<http.Response>(
+          future: http.get(Uri.parse('${ApiConfig.baseUrl}$endpoint')),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Container(
+                height: 300,
+                alignment: Alignment.center,
+                child: const CircularProgressIndicator(),
+              );
+            }
+            if (!snapshot.hasData || snapshot.data!.statusCode != 200) {
+              return Container(
+                height: 250,
+                padding: const EdgeInsets.all(24),
+                child: Center(
+                  child: Text("Unable to load directory. Please check network connection.",
+                      textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.red)),
+                ),
+              );
+            }
+
+            final List<dynamic> officials = json.decode(snapshot.data!.body);
+
+            return DraggableScrollableSheet(
+              expand: false,
+              initialChildSize: 0.6,
+              maxChildSize: 0.85,
+              minChildSize: 0.4,
+              builder: (_, scrollController) {
+                return Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 40, height: 4,
+                          decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Icon(isPolice ? Icons.local_police : Icons.gavel, color: isPolice ? Colors.indigo : const Color(0xFF001A3A)),
+                          const SizedBox(width: 10),
+                          Text(title, style: GoogleFonts.playfairDisplay(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF001A3A))),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "Verified ${isPolice ? 'police stations & officers' : 'legal practitioners'} available in the system.",
+                        style: GoogleFonts.inter(fontSize: 12, color: Colors.black54),
+                      ),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: officials.isEmpty
+                            ? Center(child: Text("No registered ${isPolice ? 'police officers' : 'lawyers'} found.", style: GoogleFonts.inter(color: Colors.black45)))
+                            : ListView.separated(
+                                controller: scrollController,
+                                itemCount: officials.length,
+                                separatorBuilder: (_, __) => const Divider(),
+                                itemBuilder: (context, index) {
+                                  final official = officials[index];
+                                  final name = official['name'] ?? 'Official';
+                                  final email = official['email'] ?? '';
+                                  final phone = official['phone'] ?? 'N/A';
+
+                                  return ListTile(
+                                    leading: CircleAvatar(
+                                      backgroundColor: isPolice ? Colors.indigo.shade100 : Colors.amber.shade100,
+                                      child: Icon(isPolice ? Icons.local_police : Icons.gavel, color: isPolice ? Colors.indigo : const Color(0xFF001A3A)),
+                                    ),
+                                    title: Text(name, style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 15)),
+                                    subtitle: Text("Email: $email\nPhone: $phone", style: GoogleFonts.inter(fontSize: 12, color: Colors.black54)),
+                                    isThreeLine: true,
+                                    trailing: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: isPolice ? Colors.indigo.withOpacity(0.1) : const Color(0xFF001A3A).withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        isPolice ? "POLICE" : "LAWYER",
+                                        style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: isPolice ? Colors.indigo : const Color(0xFF001A3A)),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showAllUsersDirectory(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return FutureBuilder<http.Response>(
+          future: http.get(Uri.parse('${ApiConfig.baseUrl}/get-all-users')),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Container(
+                height: 300,
+                alignment: Alignment.center,
+                child: const CircularProgressIndicator(),
+              );
+            }
+            if (!snapshot.hasData || snapshot.data!.statusCode != 200) {
+              return Container(
+                height: 250,
+                padding: const EdgeInsets.all(24),
+                child: Center(
+                  child: Text("Unable to load user directory. Please check network connection.",
+                      textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.red)),
+                ),
+              );
+            }
+
+            final List<dynamic> users = json.decode(snapshot.data!.body);
+
+            return DraggableScrollableSheet(
+              expand: false,
+              initialChildSize: 0.6,
+              maxChildSize: 0.85,
+              minChildSize: 0.4,
+              builder: (_, scrollController) {
+                return Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 40, height: 4,
+                          decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          const Icon(Icons.people, color: Colors.indigo),
+                          const SizedBox(width: 10),
+                          Text("All Registered Platform Users", style: GoogleFonts.playfairDisplay(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF001A3A))),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "Complete list of all registered clients, lawyers, police officers, and administrators.",
+                        style: GoogleFonts.inter(fontSize: 12, color: Colors.black54),
+                      ),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: users.isEmpty
+                            ? Center(child: Text("No registered users found.", style: GoogleFonts.inter(color: Colors.black45)))
+                            : ListView.separated(
+                                controller: scrollController,
+                                itemCount: users.length,
+                                separatorBuilder: (_, __) => const Divider(),
+                                itemBuilder: (context, index) {
+                                  final u = users[index];
+                                  final name = u['name'] ?? 'User';
+                                  final email = u['email'] ?? '';
+                                  final phone = u['phone'] ?? 'N/A';
+                                  final role = (u['role'] ?? 'client').toString().toLowerCase();
+
+                                  Color roleColor = Colors.blue;
+                                  if (role == 'lawyer') roleColor = Colors.amber.shade800;
+                                  if (role == 'police') roleColor = Colors.red.shade700;
+                                  if (role == 'admin') roleColor = Colors.purple;
+
+                                  return ListTile(
+                                    leading: CircleAvatar(
+                                      backgroundColor: roleColor.withOpacity(0.15),
+                                      child: Icon(
+                                        role == 'lawyer' ? Icons.gavel : role == 'police' ? Icons.local_police : role == 'admin' ? Icons.admin_panel_settings : Icons.person,
+                                        color: roleColor,
+                                      ),
+                                    ),
+                                    title: Text(name, style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 15)),
+                                    subtitle: Text("Email: $email\nPhone: $phone", style: GoogleFonts.inter(fontSize: 12, color: Colors.black54)),
+                                    isThreeLine: true,
+                                    trailing: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: roleColor.withOpacity(0.12),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        role.toUpperCase(),
+                                        style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: roleColor),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showActiveCasesDirectory(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.6,
+          maxChildSize: 0.85,
+          minChildSize: 0.4,
+          builder: (_, scrollController) {
+            return Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40, height: 4,
+                      decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      const Icon(Icons.folder, color: Colors.teal),
+                      const SizedBox(width: 10),
+                      Text("All System Registered Cases", style: GoogleFonts.playfairDisplay(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF001A3A))),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Overview of all active legal & emergency complaints registered in the system.",
+                    style: GoogleFonts.inter(fontSize: 12, color: Colors.black54),
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: recentCases.isEmpty
+                        ? Center(child: Text("No cases registered yet.", style: GoogleFonts.inter(color: Colors.black45)))
+                        : ListView.separated(
+                            controller: scrollController,
+                            itemCount: recentCases.length,
+                            separatorBuilder: (_, __) => const Divider(),
+                            itemBuilder: (context, index) {
+                              final c = recentCases[index];
+                              final String caseId = c['case_id'] ?? 'N/A';
+                              final String type = c['type'] ?? 'General';
+                              final String email = c['email'] ?? 'Unknown';
+                              final String status = c['status'] ?? 'Submitted';
+
+                              return ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor: Colors.teal.withOpacity(0.15),
+                                  child: const Icon(Icons.folder, color: Colors.teal),
+                                ),
+                                title: Text("Case ID: $caseId", style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 15)),
+                                subtitle: Text("Category: $type\nClient Email: $email", style: GoogleFonts.inter(fontSize: 12, color: Colors.black54)),
+                                isThreeLine: true,
+                                trailing: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.teal.withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    status.toUpperCase(),
+                                    style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.teal),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final int crossAxisCount = screenWidth > 900 ? 4 : (screenWidth > 600 ? 3 : 2);
+    final double childAspectRatio = screenWidth > 900 ? 2.2 : (screenWidth > 600 ? 1.8 : 1.5);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
@@ -234,16 +623,88 @@ class _AdminHomePageState extends State<AdminHomePage> {
                       GridView.count(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        crossAxisCount: 2,
+                        crossAxisCount: crossAxisCount,
                         crossAxisSpacing: 14,
                         mainAxisSpacing: 14,
-                        childAspectRatio: 1.2,
+                        childAspectRatio: childAspectRatio,
                         children: [
-                          statCard("Total Users", "$totalUsers", Icons.people, Colors.indigo),
-                          statCard("Active Cases", "$totalCases", Icons.folder, Colors.teal),
-                          statCard("Lawyers Pool", "$activeLawyers", Icons.gavel, Colors.amber.shade800),
-                          statCard("Police Accounts", "$activePolice", Icons.local_police, Colors.red.shade700),
+                          statCard("Total Users", "$totalUsers", Icons.people, Colors.indigo, onTap: () => _showAllUsersDirectory(context)),
+                          statCard("Active Cases", "$totalCases", Icons.folder, Colors.teal, onTap: () => _showActiveCasesDirectory(context)),
+                          statCard("Lawyers Pool", "$activeLawyers", Icons.gavel, Colors.amber.shade800, onTap: () => _showRegisteredOfficialsDirectory(context, 'lawyer')),
+                          statCard("Police Accounts", "$activePolice", Icons.local_police, Colors.red.shade700, onTap: () => _showRegisteredOfficialsDirectory(context, 'police')),
                         ],
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Registered Officials Directory Banner
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade200),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.03),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.verified_user, color: Color(0xFF001A3A), size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  "Registered Officials Directory",
+                                  style: GoogleFonts.playfairDisplay(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF001A3A),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              "Admin directory access to all registered police officers and legal advocates.",
+                              style: GoogleFonts.inter(fontSize: 12, color: Colors.black54, height: 1.4),
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton.icon(
+                                    onPressed: () => _showRegisteredOfficialsDirectory(context, 'police'),
+                                    icon: const Icon(Icons.local_police, size: 16, color: Colors.indigo),
+                                    label: Text("Police Stations", style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.indigo)),
+                                    style: OutlinedButton.styleFrom(
+                                      side: const BorderSide(color: Colors.indigo),
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    onPressed: () => _showRegisteredOfficialsDirectory(context, 'lawyer'),
+                                    icon: const Icon(Icons.gavel, size: 16, color: Colors.white),
+                                    label: Text("Registered Lawyers", style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF001A3A),
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 32),
 
@@ -340,6 +801,13 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                             color: status == 'Resolved' ? Colors.green.shade700 : Colors.amber.shade800,
                                           ),
                                         ),
+                                      ),
+                                      IconButton(
+                                        onPressed: () => _confirmDeleteCase(caseId),
+                                        icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                                        tooltip: "Delete Case",
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
                                       ),
                                     ],
                                   ),
@@ -468,13 +936,12 @@ class _UsersPageState extends State<UsersPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 DropdownButtonFormField<String>(
-                  value: selectedRole,
+                  initialValue: selectedRole,
                   decoration: const InputDecoration(labelText: "Role"),
                   items: const [
                     DropdownMenuItem(value: "lawyer", child: Text("Lawyer")),
                     DropdownMenuItem(value: "police", child: Text("Police")),
                     DropdownMenuItem(value: "client", child: Text("Client")),
-                    DropdownMenuItem(value: "admin", child: Text("Admin")),
                   ],
                   onChanged: (val) {
                     if (val != null) {
@@ -511,7 +978,7 @@ class _UsersPageState extends State<UsersPage> {
                       setDialogState(() => isSaving = true);
                       try {
                         final res = await http.post(
-                          Uri.parse('${ApiConfig.baseUrl}/signup'),
+                          Uri.parse('${ApiConfig.baseUrl}/admin/create-user'),
                           headers: {"Content-Type": "application/json"},
                           body: jsonEncode({
                             "email": emailCtrl.text.trim(),
@@ -782,6 +1249,11 @@ class _CasesPageState extends State<CasesPage> {
       if (casesRes.statusCode == 200 && usersRes.statusCode == 200) {
         final List<dynamic> fetchedCases = jsonDecode(casesRes.body);
         final List<dynamic> fetchedUsers = jsonDecode(usersRes.body);
+        fetchedCases.sort((a, b) {
+          final aDate = DateTime.tryParse(a['created_at'] ?? '') ?? DateTime(1970);
+          final bDate = DateTime.tryParse(b['created_at'] ?? '') ?? DateTime(1970);
+          return bDate.compareTo(aDate);
+        });
 
         setState(() {
           cases = fetchedCases;
@@ -795,6 +1267,60 @@ class _CasesPageState extends State<CasesPage> {
       }
     } catch (e) {
       setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> _confirmDeleteCase(String caseId) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          "Delete Case",
+          style: GoogleFonts.playfairDisplay(fontWeight: FontWeight.bold, color: Colors.red.shade900),
+        ),
+        content: Text(
+          "Are you sure you want to permanently delete Case $caseId?\n\nThis will remove the case and all associated evidence/notes from the database and client portal.",
+          style: GoogleFonts.inter(fontSize: 13, color: Colors.black87),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text("Delete Case", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        final res = await http.post(
+          Uri.parse('${ApiConfig.baseUrl}/admin/delete-case'),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({"case_id": caseId}),
+        );
+        if (res.statusCode == 200) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Case $caseId deleted successfully."), backgroundColor: Colors.green),
+          );
+          _fetchData();
+        } else {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Failed to delete case."), backgroundColor: Colors.red),
+          );
+        }
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Network Error while deleting case."), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 
@@ -1050,6 +1576,14 @@ class _CasesPageState extends State<CasesPage> {
           ),
         ),
         actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _confirmDeleteCase(caseId);
+            },
+            icon: const Icon(Icons.delete_outline, color: Colors.red),
+            tooltip: "Delete Case",
+          ),
           TextButton(onPressed: () => Navigator.pop(context), child: const Text("Close")),
           ElevatedButton(
             onPressed: () {
@@ -1069,7 +1603,9 @@ class _CasesPageState extends State<CasesPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
-        child: Column(
+        child: WebLayout(
+          maxWidth: 1200,
+          child: Column(
           children: [
             // Header
             Container(
@@ -1226,20 +1762,23 @@ class _CasesPageState extends State<CasesPage> {
                                       ],
                                     ),
                                     const SizedBox(height: 16),
-
-                                    // Action buttons
                                     Row(
                                       children: [
+                                        IconButton(
+                                          onPressed: () => _confirmDeleteCase(caseId),
+                                          icon: const Icon(Icons.delete_outline, color: Colors.red),
+                                          tooltip: "Delete Case",
+                                        ),
                                         Expanded(
                                           child: OutlinedButton(
                                             onPressed: () => _showCaseDetailsDialog(c),
                                             style: OutlinedButton.styleFrom(
                                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                             ),
-                                            child: Text("VIEW DOSSIER", style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12, color: const Color(0xFF001A3A))),
+                                            child: Text("VIEW DOSSIER", style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11, color: const Color(0xFF001A3A))),
                                           ),
                                         ),
-                                        const SizedBox(width: 10),
+                                        const SizedBox(width: 8),
                                         Expanded(
                                           child: ElevatedButton(
                                             onPressed: () => _showAllocateDialog(caseId, lawyer, police),
@@ -1247,7 +1786,7 @@ class _CasesPageState extends State<CasesPage> {
                                               backgroundColor: const Color(0xFF001A3A),
                                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                             ),
-                                            child: Text("ALLOCATE Resources", style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.white)),
+                                            child: Text("ALLOCATE", style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white)),
                                           ),
                                         ),
                                       ],
@@ -1260,6 +1799,7 @@ class _CasesPageState extends State<CasesPage> {
                         ),
             ),
           ],
+        ),
         ),
       ),
     );

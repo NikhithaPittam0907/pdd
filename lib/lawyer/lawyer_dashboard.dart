@@ -3,13 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../screens/signin_screen.dart';
 import 'assigned_cases.dart';
-import 'case_analysis.dart';
 import 'court_prep.dart';
-import 'document_draft.dart';
-import 'hearings.dart';
 import 'lawyer_appointments.dart';
 import 'legal_research.dart';
 import 'strategy.dart';
+import '../widgets/web_layout.dart';
 
 class LawyerDashboard extends StatefulWidget {
   const LawyerDashboard({super.key});
@@ -28,7 +26,6 @@ class _LawyerDashboardState
     AssignedCasesScreen(),
     LawyerAppointmentsScreen(),
     LegalResearchScreen(),
-    HearingsScreen(),
     LawyerProfilePage(),
   ];
 
@@ -81,10 +78,6 @@ class _LawyerDashboardState
           BottomNavigationBarItem(
             icon: Icon(Icons.search),
             label: "Research",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.event),
-            label: "Hearings",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
@@ -227,15 +220,20 @@ class LawyerHome extends StatelessWidget {
   @override
   Widget build(
       BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final int crossAxisCount = screenWidth > 900 ? 4 : (screenWidth > 600 ? 3 : 2);
+    final double childAspectRatio = screenWidth > 900 ? 1.6 : (screenWidth > 600 ? 1.3 : 1.1);
+
     return Scaffold(
       backgroundColor:
           const Color(0xFFF4F6FB),
       body: SafeArea(
-        child:
-            SingleChildScrollView(
-          padding:
-              const EdgeInsets.all(
-                  20),
+        child: WebLayout(
+          maxWidth: 1200,
+          child: SingleChildScrollView(
+            padding:
+                const EdgeInsets.all(
+                    20),
           child: Column(
             children: [
               Row(
@@ -318,7 +316,7 @@ class LawyerHome extends StatelessWidget {
                   height: 12),
 
               Text(
-                "Manage cases, hearings, drafting and AI-powered legal workflow.",
+                "Manage cases, appointments and AI-powered legal workflow.",
                 textAlign:
                     TextAlign.center,
                 style:
@@ -342,8 +340,6 @@ class LawyerHome extends StatelessWidget {
                   topTag(Icons
                       .psychology,
                       "AI Tools"),
-                  topTag(Icons.event,
-                      "Hearings"),
                 ],
               ),
 
@@ -354,12 +350,11 @@ class LawyerHome extends StatelessWidget {
                 shrinkWrap: true,
                 physics:
                     const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
+                crossAxisCount: crossAxisCount,
                 crossAxisSpacing:
                     12,
                 mainAxisSpacing: 12,
-                childAspectRatio:
-                    0.74,
+                childAspectRatio: childAspectRatio,
                 children: [
                   menuCard(
                     context,
@@ -367,20 +362,6 @@ class LawyerHome extends StatelessWidget {
                     "Assigned Cases",
                     "Track active legal matters.",
                     const AssignedCasesScreen(),
-                  ),
-                  menuCard(
-                    context,
-                    Icons.analytics,
-                    "Case Analysis",
-                    "AI insights & probability.",
-                    const CaseAnalysisScreen(),
-                  ),
-                  menuCard(
-                    context,
-                    Icons.description,
-                    "Document Draft",
-                    "Create legal drafts fast.",
-                    const DocumentDraftScreen(),
                   ),
                   menuCard(
                     context,
@@ -407,6 +388,7 @@ class LawyerHome extends StatelessWidget {
               ),
             ],
           ),
+        ),
         ),
       ),
     );

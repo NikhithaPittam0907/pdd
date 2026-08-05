@@ -1,12 +1,15 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'signin_screen.dart';
 import '../client/client_dashboard.dart';
 import '../lawyer/lawyer_dashboard.dart';
 import '../police/police_dashboard.dart';
 import '../admin/admin_dashboard.dart';
+import '../config/api_config.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -33,33 +36,52 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     if (email != null && email.isNotEmpty && role != null && role.isNotEmpty) {
-      if (role == 'lawyer') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const LawyerDashboard()),
-        );
-      } else if (role == 'police') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const PoliceDashboard()),
-        );
-      } else if (role == 'admin') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const AdminDashboard()),
-        );
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const ClientDashboard()),
-        );
+      try {
+        final response = await http.get(
+          Uri.parse("${ApiConfig.baseUrl}/verify-user?email=$email"),
+        ).timeout(const Duration(seconds: 3));
+
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          if (data['valid'] == true) {
+            final verifiedRole = data['role'] ?? role;
+            if (verifiedRole == 'lawyer') {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const LawyerDashboard()),
+              );
+            } else if (verifiedRole == 'police') {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const PoliceDashboard()),
+              );
+            } else if (verifiedRole == 'admin') {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const AdminDashboard()),
+              );
+            } else {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const ClientDashboard()),
+              );
+            }
+            return;
+          }
+        }
+      } catch (_) {
+        // Fallback or network error handling
       }
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const SignInScreen()),
-      );
+      
+      // If user is not found in DB or verification failed, clear session
+      await prefs.clear();
     }
+
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const SignInScreen()),
+    );
   }
 
   @override
