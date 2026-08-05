@@ -207,6 +207,10 @@ on:
 jobs:
   run-all-tests:
     runs-on: macos-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
     
     steps:
       - name: Checkout Repository
