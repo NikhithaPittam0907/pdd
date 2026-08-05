@@ -44,7 +44,7 @@ To execute tests against a live Android device or emulator:
 2. **Start the Appium Server**:
    ```bash
    npm install -g appium
-   appium driver install uiautomator2
+   appium driver install uiautomator2@2.45.1
    appium
    ```
 3. **Build the Android APK**:
