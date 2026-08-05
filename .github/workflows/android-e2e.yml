@@ -1,4 +1,4 @@
-name: Android E2E Automation
+name: Android E2E Automation Pipeline
 
 on:
   push:
@@ -9,9 +9,14 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   test:
-    name: Run Appium E2E Tests
+    name: Run Appium Android E2E Tests
     runs-on: macos-latest
     timeout-minutes: 60
 
@@ -19,7 +24,7 @@ jobs:
       - name: 1. Checkout Repository
         uses: actions/checkout@v4
 
-      - name: 2. Setup Java 17
+      - name: 2. Setup Java 17 (Zulu JDK)
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
@@ -29,78 +34,150 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'automation/package-lock.json'
 
       - name: 4. Setup Flutter SDK
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
 
-      - name: 5. Pre-Create Directories & Install Automation Dependencies
+      - name: 5. Pre-Create Automation Directories & Install Dependencies
         run: |
-          mkdir -p "automation/Test Results/Excel"
+          echo "=== Pre-creating Automation Report & Artifact Directories ==="
           mkdir -p "automation/reports/latest"
+          mkdir -p "automation/Test Results/Excel"
           mkdir -p "automation/screenshots"
           mkdir -p "automation/logs"
           mkdir -p "automation/allure-results"
+          
           cd automation
           npm install
           npm install -g allure-commandline appium
 
       - name: 6. Build Real Flutter Android APK
         run: |
+          echo "=== Building Real Flutter Debug APK ==="
           flutter pub get
           flutter build apk --debug
+          
+          echo "=== Verifying APK Existence ==="
+          if [ ! -f "build/app/outputs/flutter-apk/app-debug.apk" ]; then
+            echo "ERROR: Flutter APK build failed! File build/app/outputs/flutter-apk/app-debug.apk not found."
+            exit 1
+          fi
+          echo "✔ Verified Flutter APK built successfully at: build/app/outputs/flutter-apk/app-debug.apk"
 
-      - name: 7. Start Android Emulator, Launch Appium & Execute Tests
+      - name: 7. Launch Android Emulator & Run Appium E2E Tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 31
-          target: default
+          api-level: 30
+          target: google_apis
           arch: x86_64
-          profile: Nexus 6
+          profile: pixel_6
           disable-animations: true
+          emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -camera-back none
           script: |
-            echo "=== 1. Emulator Booted & Verified ==="
-            adb devices
-            
-            echo "=== 2. Installing UiAutomator2 Driver ==="
-            cd automation
-            npx appium driver install uiautomator2@2.45.1
-            
-            echo "=== 3. Starting Appium Server ==="
-            npx appium --log appium.log &
-            
-            echo "=== 4. Verifying Appium Server Health ==="
-            for i in {1..15}; do
-              if curl -s http://127.0.0.1:4723/status | grep -q "status"; then
-                echo "Appium Server is HEALTHY and running on port 4723!"
+            echo "=== 1. Verifying Android Emulator Boot Completion ==="
+            adb wait-for-device
+            BOOT=""
+            for i in {1..30}; do
+              BOOT=$(adb shell getprop sys.boot_completed | tr -d '\r')
+              if [ "$BOOT" = "1" ]; then
+                echo "✔ Android Emulator booted completely! (sys.boot_completed=1)"
                 break
               fi
-              echo "Waiting for Appium Server..."
-              sleep 2
+              echo "Waiting for Android system boot... ($i/30)"
+              sleep 5
             done
             
-            echo "=== 5. Executing Appium E2E Tests ==="
+            if [ "$BOOT" != "1" ]; then
+              echo "ERROR: Emulator failed to complete boot sequence within timeout!"
+              exit 1
+            fi
+            
+            echo "=== ADB Device Status ==="
+            adb devices
+            adb shell getprop sys.boot_completed
+
+            echo "=== 2. Pre-flight Environment & Driver Verification ==="
+            echo "JAVA_HOME: $JAVA_HOME"
+            echo "ANDROID_HOME: $ANDROID_HOME"
+            adb version
+            appium --version
+            
+            cd automation
+            echo "=== Installing UiAutomator2 Driver ==="
+            npx appium driver install uiautomator2 || true
+            npx appium driver list
+
+            echo "=== 3. Starting Appium Server ==="
+            npx appium --log logs/appium.log &
+            
+            echo "=== 4. Verifying Appium Server Health ==="
+            HEALTHY=false
+            for i in {1..15}; do
+              STATUS=$(curl -s http://127.0.0.1:4723/status || true)
+              if echo "$STATUS" | grep -q '"ready":true\|"status":0'; then
+                echo "✔ Appium Server is HEALTHY and listening on port 4723!"
+                HEALTHY=true
+                break
+              fi
+              echo "Waiting for Appium Server ($i/15)..."
+              sleep 2
+            done
+
+            if [ "$HEALTHY" = "false" ]; then
+              echo "ERROR: Appium Server failed health check!"
+              cat logs/appium.log
+              exit 1
+            fi
+
+            echo "=== 5. Executing Appium E2E Automation Test Suite ==="
+            export EMULATOR_DEVICE="Pixel 6 (API 30)"
+            export ANDROID_VERSION="Android 11.0"
             npm run wdio
 
       - name: 8. Generate Dynamic Reports (Excel, HTML, Allure)
         if: always()
         run: |
+          echo "=== Generating Dynamic Execution Reports ==="
           cd automation
-          node generate_tests.js
+          export GITHUB_RUN_ID="${{ github.run_id }}"
+          export GITHUB_SHA="${{ github.sha }}"
+          export EMULATOR_DEVICE="Pixel 6 Emulator"
+          export ANDROID_VERSION="Android 11.0 (API 30)"
+          
+          node generate_tests.js || true
           node generate_report.js
-          if [ -d "allure-results" ] && [ "$(ls -A allure-results)" ]; then
-            npx allure-commandline generate allure-results --clean -o reports/latest
+          
+          if command -v allure &> /dev/null || npx allure --version &> /dev/null; then
+            npx allure generate allure-results --clean -o reports/latest/allure-report || true
           fi
 
-      - name: 9. Upload Artifacts
+      - name: 9. Validate & Upload Automation Artifacts
+        if: always()
+        run: |
+          echo "=== Pre-Upload Artifact Verification ==="
+          ls -la "automation/reports/latest/"
+          ls -la "automation/Test Results/Excel/"
+          
+          if [ ! -f "automation/reports/latest/Execution_Report.xlsx" ]; then
+            echo "WARNING: Execution_Report.xlsx missing in reports/latest/"
+          fi
+          if [ ! -f "automation/reports/latest/index.html" ]; then
+            echo "ERROR: index.html missing in reports/latest/!"
+            exit 1
+          fi
+
+      - name: Upload Artifacts to GitHub Actions
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: android-automation-reports
           path: |
+            automation/reports/latest/
             automation/Test Results/Excel/Execution_Report.xlsx
-            automation/reports/latest/index.html
             automation/screenshots/
             automation/logs/
           retention-days: 30
@@ -110,10 +187,6 @@ jobs:
     needs: test
     if: always()
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pages: write
-      id-token: write
 
     steps:
       - name: Checkout Repository
@@ -123,21 +196,59 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: android-automation-reports
-          path: reports
+          path: downloaded-reports
 
-      - name: Setup Pages
+      - name: Detect Folder Structure & Consolidate Pages Site
+        run: |
+          echo "=== 1. Workspace Working Directory ==="
+          pwd
+          
+          echo "=== 2. Inspecting Downloaded Artifact Structure ==="
+          find downloaded-reports
+          
+          echo "=== 3. Consolidating HTML & Excel Reports into Public Folder ==="
+          mkdir -p public
+          
+          # Handle nested directory structures produced by artifact extraction
+          if [ -f downloaded-reports/index.html ]; then
+            cp -r downloaded-reports/* public/
+          elif [ -d downloaded-reports/latest ]; then
+            cp -r downloaded-reports/latest/* public/
+          elif [ -d downloaded-reports/automation/reports/latest ]; then
+            cp -r downloaded-reports/automation/reports/latest/* public/
+          else
+            INDEX_DIR=$(find downloaded-reports -name "index.html" -exec dirname {} \; | head -n 1)
+            if [ -n "$INDEX_DIR" ]; then
+              cp -r "$INDEX_DIR"/* public/
+            fi
+          fi
+          
+          # Ensure Execution_Report.xlsx is available at site root for HTML download button
+          if [ ! -f public/Execution_Report.xlsx ]; then
+            EXCEL_SRC=$(find downloaded-reports -name "Execution_Report.xlsx" | head -n 1)
+            if [ -n "$EXCEL_SRC" ]; then
+              cp "$EXCEL_SRC" public/Execution_Report.xlsx
+            fi
+          fi
+
+          echo "=== 4. Verifying Public Pages Directory Content ==="
+          ls -la public/
+          
+          if [ ! -f public/index.html ]; then
+            echo "ERROR: index.html was not found in the published site directory!"
+            find .
+            exit 1
+          fi
+          echo "✔ Verified public/index.html exists successfully!"
+
+      - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'reports/latest'
+          path: 'public'
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-      - name: Publish GitHub Action Summary
-        if: always()
-        run: |
-          if [ -f reports/summary.md ]; then cat reports/summary.md >> $GITHUB_STEP_SUMMARY; fi
