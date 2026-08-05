@@ -203,6 +203,8 @@ class LawyerHome extends StatelessWidget {
               subtitle,
               textAlign:
                   TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style:
                   GoogleFonts.inter(
                 fontSize: 11,
@@ -222,7 +224,7 @@ class LawyerHome extends StatelessWidget {
       BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final int crossAxisCount = screenWidth > 900 ? 4 : (screenWidth > 600 ? 3 : 2);
-    final double childAspectRatio = screenWidth > 900 ? 1.6 : (screenWidth > 600 ? 1.3 : 1.1);
+    final double childAspectRatio = screenWidth > 900 ? 1.5 : (screenWidth > 600 ? 1.2 : 0.92);
 
     return Scaffold(
       backgroundColor:

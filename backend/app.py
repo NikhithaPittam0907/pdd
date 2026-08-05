@@ -2638,5 +2638,96 @@ def admin_activity_logs():
         return jsonify({"message": str(e)}), 500
 
 
+# 5. EVIDENCE BUNDLE APIS
+@app.route('/api/evidence/upload', methods=['POST'])
+def upload_evidence_bundle():
+    try:
+        case_id = request.form.get('case_id')
+        category = request.form.get('category', 'General')
+        uploaded_by = request.form.get('uploaded_by', 'lawyer@gmail.com')
+
+        if not case_id:
+            return jsonify({'message': 'case_id is required'}), 400
+
+        if 'file' not in request.files:
+            return jsonify({'message': 'No file attached'}), 400
+
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'message': 'No selected file'}), 400
+
+        filename = secure_filename(file.filename)
+        evidence_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'evidence')
+        if not os.path.exists(evidence_dir):
+            os.makedirs(evidence_dir)
+
+        save_path = os.path.join(evidence_dir, filename)
+        file.save(save_path)
+
+        relative_path = f"evidence/{filename}"
+        ext = filename.split('.')[-1].lower() if '.' in filename else ''
+
+        new_evidence = Evidence(
+            case_id=str(case_id),
+            file_name=filename,
+            file_path=relative_path,
+            file_type=ext,
+            category=category,
+            uploaded_by=uploaded_by,
+            status="Uploaded",
+            uploaded_at=datetime.now()
+        )
+        db.session.add(new_evidence)
+        db.session.commit()
+
+        return jsonify({
+            "id": new_evidence.id,
+            "case_id": new_evidence.case_id,
+            "file_name": new_evidence.file_name,
+            "file_path": new_evidence.file_path,
+            "file_type": new_evidence.file_type,
+            "category": new_evidence.category,
+            "uploaded_by": new_evidence.uploaded_by,
+            "status": new_evidence.status,
+            "uploaded_at": new_evidence.uploaded_at.isoformat()
+        }), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': str(e)}), 500
+
+
+@app.route('/api/evidence/<case_id>', methods=['GET'])
+def get_case_evidences(case_id):
+    try:
+        evidences = Evidence.query.filter_by(case_id=str(case_id)).order_by(Evidence.uploaded_at.desc()).all()
+        return jsonify([{
+            "id": e.id,
+            "case_id": e.case_id,
+            "file_name": e.file_name,
+            "file_path": e.file_path,
+            "file_type": e.file_type,
+            "category": e.category,
+            "uploaded_by": e.uploaded_by,
+            "status": e.status,
+            "uploaded_at": e.uploaded_at.isoformat()
+        } for e in evidences]), 200
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500
+
+
+@app.route('/api/evidence/<int:evidence_id>', methods=['DELETE'])
+def delete_case_evidence(evidence_id):
+    try:
+        evidence = Evidence.query.get(evidence_id)
+        if not evidence:
+            return jsonify({'message': 'Evidence not found'}), 404
+        db.session.delete(evidence)
+        db.session.commit()
+        return jsonify({'message': 'Evidence deleted successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': str(e)}), 500
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=port, debug=True, use_reloader=False)

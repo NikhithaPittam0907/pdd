@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import '../config/api_config.dart';
 
 class CyberCrimeFlowScreen extends StatefulWidget {
@@ -60,7 +61,7 @@ class _CyberCrimeFlowScreenState extends State<CyberCrimeFlowScreen> {
   }
 
   Future<void> _pickFile(bool isEvidence) async {
-    final result = await FilePicker.pickFiles(type: FileType.custom, allowedExtensions: ['pdf', 'jpg', 'png', 'docx']);
+    final result = await FilePicker.pickFiles(type: FileType.custom, allowedExtensions: ['pdf', 'jpg', 'png', 'docx'], withData: true);
     if (result != null) {
       setState(() {
         if (isEvidence) evidenceFile = result.files.first;
@@ -81,11 +82,20 @@ class _CyberCrimeFlowScreenState extends State<CyberCrimeFlowScreen> {
         ..fields['description'] = descriptionController.text
         ..fields['amount'] = amountController.text;
 
-      if (evidenceFile?.path != null) {
-        req.files.add(await http.MultipartFile.fromPath('evidence', evidenceFile!.path!));
-      }
-      if (paymentProofFile?.path != null) {
-        req.files.add(await http.MultipartFile.fromPath('id_proof', paymentProofFile!.path!));
+      if (kIsWeb) {
+        if (evidenceFile?.bytes != null) {
+          req.files.add(http.MultipartFile.fromBytes('evidence', evidenceFile!.bytes!, filename: evidenceFile!.name));
+        }
+        if (paymentProofFile?.bytes != null) {
+          req.files.add(http.MultipartFile.fromBytes('id_proof', paymentProofFile!.bytes!, filename: paymentProofFile!.name));
+        }
+      } else {
+        if (evidenceFile?.path != null) {
+          req.files.add(await http.MultipartFile.fromPath('evidence', evidenceFile!.path!));
+        }
+        if (paymentProofFile?.path != null) {
+          req.files.add(await http.MultipartFile.fromPath('id_proof', paymentProofFile!.path!));
+        }
       }
 
       final streamed = await req.send().timeout(const Duration(seconds: 40));

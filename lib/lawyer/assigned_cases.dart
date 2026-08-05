@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../config/api_config.dart';
 
 class AssignedCasesScreen extends StatefulWidget {
@@ -45,7 +46,9 @@ class _AssignedCasesScreenState extends State<AssignedCasesScreen> {
   }
 
   Widget caseCard(Map<String, dynamic> c) {
-    String title = c['type'] ?? "General Case";
+    String rawType = c['type'] ?? "General Case";
+    String caseId = c['case_id'] ?? "N/A";
+    String title = (rawType.toLowerCase().contains('domestic') || rawType.toLowerCase().contains('violence')) ? "Case ID: $caseId" : rawType;
     String client = c['email'] ?? "Unknown";
     String type = c['type'] ?? "Legal Matter";
     String status = c['handling_status'] ?? c['status'] ?? "Active";
@@ -319,6 +322,95 @@ class LawyerCaseDetailsScreen extends StatefulWidget {
 class _LawyerCaseDetailsScreenState extends State<LawyerCaseDetailsScreen> {
   bool isAccepting = false;
 
+  String _resolveFileUrl(String serverPath) {
+    if (serverPath.isEmpty) return "";
+    if (serverPath.startsWith("http://") || serverPath.startsWith("https://")) {
+      return serverPath;
+    }
+    String cleanPath = serverPath.replaceAll('\\', '/');
+    if (cleanPath.contains("uploads/")) {
+      cleanPath = cleanPath.substring(cleanPath.indexOf("uploads/") + "uploads/".length);
+    }
+    return "${ApiConfig.baseUrl}/uploads/$cleanPath";
+  }
+
+  void _previewFile(BuildContext context, String pathVal) {
+    final url = _resolveFileUrl(pathVal);
+    if (url.isEmpty) return;
+
+    final lower = pathVal.toLowerCase();
+    final isImage = lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png');
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      pathVal.split('/').last.split('\\').last,
+                      style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  )
+                ],
+              ),
+              const Divider(),
+              const SizedBox(height: 12),
+              if (isImage)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    url,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => Column(
+                      children: [
+                        const Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                        const SizedBox(height: 8),
+                        Text("Unable to load image preview.", style: GoogleFonts.inter(color: Colors.grey, fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                Column(
+                  children: [
+                    Icon(_fileIcon(pathVal), size: 54, color: const Color(0xFF0B132B)),
+                    const SizedBox(height: 12),
+                    Text("Document / Evidence File Attached", style: GoogleFonts.inter(fontSize: 13, color: Colors.black87)),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        final uri = Uri.parse(url);
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        }
+                      },
+                      icon: const Icon(Icons.open_in_new, size: 18),
+                      label: const Text("Open / Download File"),
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0B132B)),
+                    )
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   IconData _fileIcon(String filename) {
     final lower = filename.toLowerCase();
     if (lower.endsWith('.pdf')) return Icons.picture_as_pdf;
@@ -397,7 +489,10 @@ class _LawyerCaseDetailsScreenState extends State<LawyerCaseDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(type, style: GoogleFonts.playfairDisplay(fontSize: 28, fontWeight: FontWeight.bold, color: const Color(0xFF0B132B))),
+            Text(
+              (type.toLowerCase().contains('domestic') || type.toLowerCase().contains('violence')) ? "Case ID: $caseId" : type,
+              style: GoogleFonts.playfairDisplay(fontSize: 28, fontWeight: FontWeight.bold, color: const Color(0xFF0B132B)),
+            ),
             const SizedBox(height: 8),
             Text("Case ID: $caseId", style: GoogleFonts.inter(color: Colors.black54)),
             const SizedBox(height: 24),
@@ -423,30 +518,52 @@ class _LawyerCaseDetailsScreenState extends State<LawyerCaseDetailsScreen> {
                           children: [
                             Text("UPLOADED FILES", style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.black45)),
                             const SizedBox(height: 8),
-                            ...files.entries.map((fe) => Container(
-                              margin: const EdgeInsets.only(bottom: 8),
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.grey.shade200),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(_fileIcon(fe.value.toString()), color: const Color(0xFF0B132B), size: 20),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                            ...files.entries.map((fe) {
+                              final pathVal = fe.value.toString();
+                              final bool hasFile = pathVal.isNotEmpty;
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 8),
+                                child: InkWell(
+                                  onTap: !hasFile ? null : () => _previewFile(context, pathVal),
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: hasFile ? Colors.blue.shade100 : Colors.grey.shade200),
+                                    ),
+                                    child: Row(
                                       children: [
-                                        Text(fe.key.toString().replaceAll('_', ' ').toUpperCase(), style: GoogleFonts.inter(fontSize: 10, color: Colors.black45, fontWeight: FontWeight.w600)),
-                                        Text(fe.value.toString().isNotEmpty ? fe.value.toString() : 'Not uploaded', style: GoogleFonts.inter(fontSize: 13, color: Colors.black87)),
+                                        Icon(_fileIcon(pathVal), color: hasFile ? Colors.blue.shade700 : const Color(0xFF0B132B), size: 20),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(fe.key.toString().replaceAll('_', ' ').toUpperCase(), style: GoogleFonts.inter(fontSize: 10, color: Colors.black45, fontWeight: FontWeight.w600)),
+                                              Text(
+                                                hasFile ? pathVal.split('/').last.split('\\').last : 'Not uploaded',
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 13,
+                                                  color: hasFile ? Colors.blue.shade900 : Colors.black87,
+                                                  fontWeight: hasFile ? FontWeight.w600 : FontWeight.normal,
+                                                  decoration: hasFile ? TextDecoration.underline : null,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        if (hasFile)
+                                          Icon(Icons.open_in_new, size: 16, color: Colors.blue.shade700),
                                       ],
                                     ),
                                   ),
-                                ],
-                              ),
-                            )),
+                                ),
+                              );
+                            }),
                           ],
                         ),
                       );

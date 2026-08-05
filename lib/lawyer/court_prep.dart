@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -659,10 +660,13 @@ class _EvidenceBundleScreenState extends State<EvidenceBundleScreen> {
     try {
       FilePickerResult? result = await FilePicker.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['pdf', 'docx', 'jpg', 'png', 'mp4'],
+        allowedExtensions: ['pdf', 'docx', 'jpg', 'jpeg', 'png', 'mp4'],
+        withData: true,
       );
 
-      if (result != null && result.files.single.path != null) {
+      if (result != null && result.files.isNotEmpty) {
+        final pf = result.files.single;
+
         String category = "General";
         if (!mounted) return;
         await showDialog(
@@ -688,18 +692,53 @@ class _EvidenceBundleScreenState extends State<EvidenceBundleScreen> {
         request.fields['case_id'] = widget.caseId;
         request.fields['category'] = category;
         request.fields['uploaded_by'] = 'lawyer@gmail.com';
-        request.files.add(await http.MultipartFile.fromPath('file', result.files.single.path!));
+
+        if (kIsWeb) {
+          if (pf.bytes != null) {
+            request.files.add(
+              http.MultipartFile.fromBytes(
+                'file',
+                pf.bytes!,
+                filename: pf.name,
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Error reading file bytes on Web")),
+            );
+            return;
+          }
+        } else {
+          if (pf.path != null) {
+            request.files.add(await http.MultipartFile.fromPath('file', pf.path!));
+          } else if (pf.bytes != null) {
+            request.files.add(
+              http.MultipartFile.fromBytes(
+                'file',
+                pf.bytes!,
+                filename: pf.name,
+              ),
+            );
+          } else {
+            return;
+          }
+        }
 
         final response = await request.send();
         if (response.statusCode == 201) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Evidence uploaded successfully!")));
           _fetchEvidence();
+        } else {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Error uploading evidence (Status ${response.statusCode})"), backgroundColor: Colors.red),
+          );
         }
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Error uploading evidence"), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error uploading evidence: $e"), backgroundColor: Colors.red));
     }
   }
 
@@ -717,14 +756,84 @@ class _EvidenceBundleScreenState extends State<EvidenceBundleScreen> {
     }
   }
 
-  void _previewFile(String filePath) async {
-    final url = Uri.parse('${ApiConfig.baseUrl}/uploads/$filePath');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    } else {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Could not launch file preview")));
+  void _previewFile(String filePath) {
+    if (filePath.isEmpty) return;
+    String cleanPath = filePath.replaceAll('\\', '/');
+    if (cleanPath.contains("uploads/")) {
+      cleanPath = cleanPath.substring(cleanPath.indexOf("uploads/") + "uploads/".length);
     }
+    final url = '${ApiConfig.baseUrl}/uploads/$cleanPath';
+    final lower = filePath.toLowerCase();
+    final isImage = lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png');
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      filePath.split('/').last.split('\\').last,
+                      style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  )
+                ],
+              ),
+              const Divider(),
+              const SizedBox(height: 12),
+              if (isImage)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    url,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => Column(
+                      children: [
+                        const Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                        const SizedBox(height: 8),
+                        Text("Unable to load image preview.", style: GoogleFonts.inter(color: Colors.grey, fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                Column(
+                  children: [
+                    Icon(_getFileIcon(filePath.split('.').last.toLowerCase()), size: 54, color: const Color(0xFF0B132B)),
+                    const SizedBox(height: 12),
+                    Text("Document / Evidence File Attached", style: GoogleFonts.inter(fontSize: 13, color: Colors.black87)),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        final uri = Uri.parse(url);
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        }
+                      },
+                      icon: const Icon(Icons.open_in_new, size: 18),
+                      label: const Text("Open / Download File"),
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0B132B)),
+                    )
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   IconData _getFileIcon(String ext) {

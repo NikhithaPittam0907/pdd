@@ -314,7 +314,13 @@ class _AdminHomePageState extends State<AdminHomePage> {
                         children: [
                           Icon(isPolice ? Icons.local_police : Icons.gavel, color: isPolice ? Colors.indigo : const Color(0xFF001A3A)),
                           const SizedBox(width: 10),
-                          Text(title, style: GoogleFonts.playfairDisplay(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF001A3A))),
+                          Expanded(
+                            child: Text(
+                              title,
+                              style: GoogleFonts.playfairDisplay(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF001A3A)),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 4),
@@ -671,12 +677,15 @@ class _AdminHomePageState extends State<AdminHomePage> {
                               children: [
                                 const Icon(Icons.verified_user, color: Color(0xFF001A3A), size: 20),
                                 const SizedBox(width: 8),
-                                Text(
-                                  "Registered Officials Directory",
-                                  style: GoogleFonts.playfairDisplay(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF001A3A),
+                                Expanded(
+                                  child: Text(
+                                    "Registered Officials Directory",
+                                    style: GoogleFonts.playfairDisplay(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color(0xFF001A3A),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               ],
@@ -792,7 +801,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              type,
+                                              (type == 'Domestic Violence' || type.contains('Domestic')) ? "Case $caseId" : type,
                                               style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14),
                                             ),
                                             const SizedBox(height: 4),
@@ -1413,13 +1422,14 @@ class _CasesPageState extends State<CasesPage> {
               const SizedBox(height: 20),
               // Lawyer select
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 value: selectedLawyer,
                 decoration: const InputDecoration(labelText: "Assign Legal Representative (Lawyer)"),
                 hint: const Text("Select Lawyer"),
                 items: lawyers
                     .map((l) => DropdownMenuItem<String>(
                           value: l['email'],
-                          child: Text("${l['name']} (${l['email']})"),
+                          child: Text("${l['name']} (${l['email']})", overflow: TextOverflow.ellipsis),
                         ))
                     .toList(),
                 onChanged: (val) {
@@ -1429,13 +1439,14 @@ class _CasesPageState extends State<CasesPage> {
               const SizedBox(height: 16),
               // Police select
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 value: selectedPolice,
                 decoration: const InputDecoration(labelText: "Assign Enforcement / Station (Police)"),
                 hint: const Text("Select Police Officer"),
                 items: police
                     .map((p) => DropdownMenuItem<String>(
                           value: p['email'],
-                          child: Text("${p['name']} (${p['email']})"),
+                          child: Text("${p['name']} (${p['email']})", overflow: TextOverflow.ellipsis),
                         ))
                     .toList(),
                 onChanged: (val) {
@@ -1716,15 +1727,17 @@ class _CasesPageState extends State<CasesPage> {
                                   children: [
                                     // Row 1: Category & status
                                     Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Expanded(
                                           child: Text(
-                                            type,
-                                            style: GoogleFonts.playfairDisplay(fontSize: 19, fontWeight: FontWeight.bold, color: const Color(0xFF001A3A)),
+                                            (type == 'Domestic Violence' || type.contains('Domestic')) ? "Case $caseId" : type,
+                                            style: GoogleFonts.playfairDisplay(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF001A3A)),
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                           decoration: BoxDecoration(
                                             color: status == 'Resolved' ? Colors.green.shade50 : Colors.amber.shade50,
                                             borderRadius: BorderRadius.circular(20),
@@ -1749,9 +1762,12 @@ class _CasesPageState extends State<CasesPage> {
                                       children: [
                                         Icon(Icons.gavel, size: 16, color: needsLawyer ? Colors.orange : Colors.green),
                                         const SizedBox(width: 8),
-                                        Text(
-                                          needsLawyer ? "Lawyer: Pending Allocation" : "Lawyer: $lawyer",
-                                          style: GoogleFonts.inter(fontSize: 12, color: needsLawyer ? Colors.orange.shade900 : Colors.green.shade900, fontWeight: FontWeight.w500),
+                                        Expanded(
+                                          child: Text(
+                                            needsLawyer ? "Lawyer: Pending Allocation" : "Lawyer: $lawyer",
+                                            style: GoogleFonts.inter(fontSize: 12, color: needsLawyer ? Colors.orange.shade900 : Colors.green.shade900, fontWeight: FontWeight.w500),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -1760,9 +1776,12 @@ class _CasesPageState extends State<CasesPage> {
                                       children: [
                                         Icon(Icons.local_police, size: 16, color: needsPolice ? Colors.orange : Colors.green),
                                         const SizedBox(width: 8),
-                                        Text(
-                                          needsPolice ? "Police: Pending Notification" : "Police: $police",
-                                          style: GoogleFonts.inter(fontSize: 12, color: needsPolice ? Colors.orange.shade900 : Colors.green.shade900, fontWeight: FontWeight.w500),
+                                        Expanded(
+                                          child: Text(
+                                            needsPolice ? "Police: Pending Notification" : "Police: $police",
+                                            style: GoogleFonts.inter(fontSize: 12, color: needsPolice ? Colors.orange.shade900 : Colors.green.shade900, fontWeight: FontWeight.w500),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -1771,7 +1790,13 @@ class _CasesPageState extends State<CasesPage> {
                                       children: [
                                         const Icon(Icons.circle, size: 10, color: Colors.blue),
                                         const SizedBox(width: 14),
-                                        Text("Operation: $handle", style: GoogleFonts.inter(fontSize: 12, color: Colors.grey)),
+                                        Expanded(
+                                          child: Text(
+                                            "Operation: $handle",
+                                            style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
                                       ],
                                     ),
                                     const SizedBox(height: 16),
@@ -1786,9 +1811,13 @@ class _CasesPageState extends State<CasesPage> {
                                           child: OutlinedButton(
                                             onPressed: () => _showCaseDetailsDialog(c),
                                             style: OutlinedButton.styleFrom(
+                                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
                                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                             ),
-                                            child: Text("VIEW DOSSIER", style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11, color: const Color(0xFF001A3A))),
+                                            child: FittedBox(
+                                              fit: BoxFit.scaleDown,
+                                              child: Text("VIEW DOSSIER", style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11, color: const Color(0xFF001A3A))),
+                                            ),
                                           ),
                                         ),
                                         const SizedBox(width: 8),
@@ -1797,9 +1826,13 @@ class _CasesPageState extends State<CasesPage> {
                                             onPressed: () => _showAllocateDialog(caseId, lawyer, police),
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: const Color(0xFF001A3A),
+                                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
                                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                             ),
-                                            child: Text("ALLOCATE", style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white)),
+                                            child: FittedBox(
+                                              fit: BoxFit.scaleDown,
+                                              child: Text("ALLOCATE", style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white)),
+                                            ),
                                           ),
                                         ),
                                       ],

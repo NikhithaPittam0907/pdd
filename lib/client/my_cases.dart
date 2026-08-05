@@ -334,7 +334,7 @@ class _MyCasesScreenState extends State<MyCasesScreen> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    Text(type, style: GoogleFonts.playfairDisplay(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF0B132B))),
+                    Text((type.toLowerCase().contains('domestic') || type.toLowerCase().contains('violence')) ? "Case ID: $caseId" : type, style: GoogleFonts.playfairDisplay(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF0B132B))),
                     const SizedBox(height: 4),
                     Text(
                       analysis['case_summary'] ?? analysis['risk_summary'] ?? 'New case submission in progress.',
@@ -398,8 +398,8 @@ class _CaseDetailsScreenState extends State<CaseDetailsScreen> {
       return serverPath;
     }
     String cleanPath = serverPath.replaceAll('\\', '/');
-    if (cleanPath.startsWith("uploads/")) {
-      cleanPath = cleanPath.substring("uploads/".length);
+    if (cleanPath.contains("uploads/")) {
+      cleanPath = cleanPath.substring(cleanPath.indexOf("uploads/") + "uploads/".length);
     }
     return "${ApiConfig.baseUrl}/uploads/$cleanPath";
   }
@@ -585,7 +585,7 @@ class _CaseDetailsScreenState extends State<CaseDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(type, style: GoogleFonts.playfairDisplay(fontSize: 28, fontWeight: FontWeight.bold)),
+            Text((type.toLowerCase().contains('domestic') || type.toLowerCase().contains('violence')) ? "Case ID: $caseId" : type, style: GoogleFonts.playfairDisplay(fontSize: 28, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Text("ID: $caseId", style: GoogleFonts.inter(color: Colors.black45)),
             const SizedBox(height: 16),

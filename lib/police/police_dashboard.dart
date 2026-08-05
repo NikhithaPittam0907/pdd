@@ -54,7 +54,9 @@ class _PoliceDashboardState extends State<PoliceDashboard> {
   }
 
   Widget caseCard(Map<String, dynamic> c) {
-    String title = c['type'] ?? "General Case";
+    String rawType = c['type'] ?? "General Case";
+    String caseId = c['case_id'] ?? "N/A";
+    String title = (rawType.toLowerCase().contains('domestic') || rawType.toLowerCase().contains('violence')) ? "Case ID: $caseId" : rawType;
     String client = c['email'] ?? "Unknown";
     String status = c['handling_status'] ?? c['status'] ?? "Pending";
     String date = c['created_at'] != null ? c['created_at'].toString().split('T')[0] : "Unknown Date";
@@ -276,10 +278,87 @@ class _PoliceCaseDetailsScreenState extends State<PoliceCaseDetailsScreen> {
       return serverPath;
     }
     String cleanPath = serverPath.replaceAll('\\', '/');
-    if (cleanPath.startsWith("uploads/")) {
-      cleanPath = cleanPath.substring("uploads/".length);
+    if (cleanPath.contains("uploads/")) {
+      cleanPath = cleanPath.substring(cleanPath.indexOf("uploads/") + "uploads/".length);
     }
     return "${ApiConfig.baseUrl}/uploads/$cleanPath";
+  }
+
+  void _previewFile(BuildContext context, String pathVal) {
+    final url = _resolveFileUrl(pathVal);
+    if (url.isEmpty) return;
+
+    final lower = pathVal.toLowerCase();
+    final isImage = lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png');
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      pathVal.split('/').last.split('\\').last,
+                      style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  )
+                ],
+              ),
+              const Divider(),
+              const SizedBox(height: 12),
+              if (isImage)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    url,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => Column(
+                      children: [
+                        const Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                        const SizedBox(height: 8),
+                        Text("Unable to load image preview.", style: GoogleFonts.inter(color: Colors.grey, fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                Column(
+                  children: [
+                    Icon(_fileIcon(pathVal), size: 54, color: const Color(0xFF0B132B)),
+                    const SizedBox(height: 12),
+                    Text("Document / Evidence File Attached", style: GoogleFonts.inter(fontSize: 13, color: Colors.black87)),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        final uri = Uri.parse(url);
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        }
+                      },
+                      icon: const Icon(Icons.open_in_new, size: 18),
+                      label: const Text("Open / Download File"),
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0B132B)),
+                    )
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   IconData _fileIcon(String filename) {
@@ -396,20 +475,8 @@ class _PoliceCaseDetailsScreenState extends State<PoliceCaseDetailsScreen> {
                                return Container(
                                  margin: const EdgeInsets.only(bottom: 8),
                                  child: InkWell(
-                                   onTap: !hasFile ? null : () async {
-                                     final url = _resolveFileUrl(pathVal);
-                                     if (url.isNotEmpty) {
-                                       final uri = Uri.parse(url);
-                                       if (await canLaunchUrl(uri)) {
-                                         await launchUrl(uri, mode: LaunchMode.externalApplication);
-                                       } else {
-                                         if (context.mounted) {
-                                           ScaffoldMessenger.of(context).showSnackBar(
-                                             const SnackBar(content: Text("Could not open file URL")),
-                                           );
-                                         }
-                                       }
-                                     }
+                                   onTap: !hasFile ? null : () {
+                                     _previewFile(context, pathVal);
                                    },
                                    borderRadius: BorderRadius.circular(8),
                                    child: Container(
