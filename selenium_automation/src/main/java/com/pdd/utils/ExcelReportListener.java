@@ -47,7 +47,6 @@ public class ExcelReportListener implements ITestListener {
             sheet.setColumnWidth(i, 6000); // Set column width
         }
     }
-    }
 
     @Override
     public synchronized void onTestSuccess(ITestResult result) {

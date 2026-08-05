@@ -58,4 +58,9 @@ backend/uploads/
 /Test Results/
 /gh-pages-stage/
 .pytest_cache/
+node_modules/
+**/node_modules/
+target/
+**/target/
+
 

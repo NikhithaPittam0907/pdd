@@ -103,8 +103,6 @@ class _AssignedCasesScreenState extends State<AssignedCasesScreen> {
           const SizedBox(height: 14),
           infoRow(Icons.person, "Client", client),
           const SizedBox(height: 10),
-          infoRow(Icons.gavel, "Case Type", type),
-          const SizedBox(height: 10),
           infoRow(Icons.event, "Requested On", date),
           const SizedBox(height: 18),
 
