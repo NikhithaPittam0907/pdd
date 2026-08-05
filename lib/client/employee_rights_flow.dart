@@ -102,7 +102,7 @@ class _EmployeeRightsFlowScreenState extends State<EmployeeRightsFlowScreen> {
         }
       }
 
-      final streamed = await req.send().timeout(const Duration(seconds: 60));
+      final streamed = await req.send().timeout(const Duration(seconds: 90));
       final res = await http.Response.fromStream(streamed);
       if (res.statusCode == 200) {
         if (mounted) setState(() { _caseResult = json.decode(res.body); _isSubmitting = false; });

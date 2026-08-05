@@ -12,6 +12,7 @@ class ApiConfig {
       return "http://localhost:5000";
     }
 
-    return "http://127.0.0.1:5000";
+    // Use machine's local IP address for physical Android devices over Wi-Fi
+    return "http://10.17.207.30:5000";
   }
 }

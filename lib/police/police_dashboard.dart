@@ -416,6 +416,54 @@ class _PoliceCaseDetailsScreenState extends State<PoliceCaseDetailsScreen> {
     setState(() => isAccepting = false);
   }
 
+  bool isUpdatingStatus = false;
+
+  Future<void> _updateStatus(String newStatus) async {
+    setState(() => isUpdatingStatus = true);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final officialName = prefs.getString('name') ?? '';
+      final officialEmail = prefs.getString('email') ?? '';
+
+      final response = await http.post(
+        Uri.parse('${ApiConfig.baseUrl}/update-case-status'),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "case_id": widget.caseData['case_id'],
+          "role": "police",
+          "new_status": newStatus,
+          "official_name": officialName,
+          "official_email": officialEmail,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Status updated to $newStatus"),
+            backgroundColor: Colors.green,
+          ),
+        );
+        widget.onAccept();
+        Navigator.pop(context);
+      } else {
+        if (!mounted) return;
+        String errMsg = "Failed to update status.";
+        try { errMsg = jsonDecode(response.body)['message'] ?? errMsg; } catch (_) {}
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errMsg), backgroundColor: Colors.red),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Network Error")),
+      );
+    }
+    setState(() => isUpdatingStatus = false);
+  }
+
   @override
   Widget build(BuildContext context) {
     final analysis = widget.caseData['analysis'] ?? {};
@@ -637,22 +685,57 @@ class _PoliceCaseDetailsScreenState extends State<PoliceCaseDetailsScreen> {
                 ],
               )
             else
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.green.withOpacity(0.3)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.check_circle, color: Colors.green),
-                    const SizedBox(width: 8),
-                    Text("Case Accepted", style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.green)),
-                  ],
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.green.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.check_circle, color: Colors.green),
+                        const SizedBox(width: 8),
+                        Text("Case Accepted", style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.green)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text("UPDATE STATUS", style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Colors.black45)),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          value: status.startsWith("Police: ") ? status.replaceAll("Police: ", "") : null,
+                          hint: const Text("Select new status"),
+                          items: const [
+                            DropdownMenuItem(value: "Action Taken", child: Text("Action Taken")),
+                            DropdownMenuItem(value: "Completed", child: Text("Completed")),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) {
+                              _updateStatus(val);
+                            }
+                          },
+                        ),
+                      ),
+                      if (isUpdatingStatus) ...[
+                        const SizedBox(width: 16),
+                        const CircularProgressIndicator(),
+                      ]
+                    ],
+                  ),
+                ],
               ),
           ],
         ),

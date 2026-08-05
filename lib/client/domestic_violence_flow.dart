@@ -304,7 +304,7 @@ class _DomesticViolenceFlowScreenState extends State<DomesticViolenceFlowScreen>
         }
       }
 
-      final streamed = await req.send().timeout(const Duration(seconds: 30));
+      final streamed = await req.send().timeout(const Duration(seconds: 90));
       final res = await http.Response.fromStream(streamed);
       if (res.statusCode == 200) {
         statusTimer.cancel();
@@ -956,7 +956,7 @@ class _DomesticViolenceFlowScreenState extends State<DomesticViolenceFlowScreen>
           "case_id": caseId,
           "assign_to": assignTo,
         }),
-      ).timeout(const Duration(seconds: 5));
+      ).timeout(const Duration(seconds: 90));
 
       if (mounted) {
         _nextPage();

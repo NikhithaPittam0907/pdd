@@ -709,6 +709,48 @@ def accept_case():
         print(f"Accept case error: {e}")
         return jsonify({"message": f"Server error: {str(e)}"}), 500
 
+@app.route("/update-case-status", methods=["POST"])
+def update_case_status():
+    try:
+        data = request.get_json()
+        case_id = data.get("case_id")
+        role = data.get("role")
+        new_status = data.get("new_status")
+        official_name = data.get("official_name", "")
+        official_email = data.get("official_email", "")
+
+        if not case_id or not role or not new_status:
+            return jsonify({"message": "Missing required fields"}), 400
+
+        case = Case.query.filter_by(case_id=str(case_id)).first()
+        if not case:
+            return jsonify({"message": f"Case not found: {case_id}"}), 404
+
+        display_official = official_name if official_name else (official_email if official_email else role.capitalize())
+
+        case.status = new_status
+        if role == "lawyer":
+            case.handling_status = f"Lawyer: {new_status}"
+        elif role == "police":
+            case.handling_status = f"Police: {new_status}"
+
+        notif = Notification(
+            user_email=case.email,
+            case_id=case.case_id,
+            title=f"Case {case.case_id} Status Update",
+            message=f"The {role.capitalize()} ({display_official}) has updated your case status to: {new_status}.",
+            type="status_update",
+            created_at=datetime.now()
+        )
+        db.session.add(notif)
+        db.session.commit()
+        
+        return jsonify({"message": f"Case status updated to {new_status} successfully"}), 200
+
+    except Exception as e:
+        print(f"Update case status error: {e}")
+        return jsonify({"message": f"Server error: {str(e)}"}), 500
+
 @app.route("/get-notifications", methods=["GET"])
 def get_notifications():
     email = request.args.get("email")

@@ -365,7 +365,7 @@ class _LandFraudFlowScreenState extends State<LandFraudFlowScreen> {
         req.files.add(await http.MultipartFile.fromPath('optional_doc', optionalDocFile!.path!));
       }
 
-      final streamed = await req.send().timeout(const Duration(seconds: 40));
+      final streamed = await req.send().timeout(const Duration(seconds: 90));
       final res = await http.Response.fromStream(streamed);
       if (res.statusCode == 200) {
         if (mounted) setState(() { _caseResult = json.decode(res.body); _isSubmitting = false; });
