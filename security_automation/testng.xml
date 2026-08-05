@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="security_automation Suite" parallel="classes" thread-count="4">
+    <listeners>
+        <listener class-name="com.pdd.utils.ExcelReportListener"/>
+    </listeners>
+    <test name="All Modules">
+        <packages>
+            <package name="com.pdd.tests"/>
+        </packages>
+    </test>
+</suite>
