@@ -34,9 +34,20 @@ public class ExcelReportListener implements ITestListener {
 
     private void createHeader(Sheet sheet) {
         Row row = sheet.createRow(0);
-        row.createCell(0).setCellValue("Test Name");
-        row.createCell(1).setCellValue("Status");
-        row.createCell(2).setCellValue("Exception");
+        
+        // Styling the header
+        CellStyle headerStyle = workbook.createCellStyle();
+        Font font = workbook.createFont();
+        font.setBold(true);
+        headerStyle.setFont(font);
+        
+        String[] columns = {"Test Case ID", "Test Module", "Test Name", "Execution Status", "Execution Time (ms)", "Error Details"};
+        for (int i = 0; i < columns.length; i++) {
+            Cell cell = row.createCell(i);
+            cell.setCellValue(columns[i]);
+            cell.setCellStyle(headerStyle);
+            sheet.setColumnWidth(i, 6000); // Set column width
+        }
     }
 
     @Override
@@ -53,10 +64,20 @@ public class ExcelReportListener implements ITestListener {
 
     private synchronized void logTest(Sheet sheet, ITestResult result, String status, int rowIndex) {
         Row row = sheet.createRow(rowIndex);
-        row.createCell(0).setCellValue(result.getName());
-        row.createCell(1).setCellValue(status);
+        
+        String module = result.getTestClass() != null ? result.getTestClass().getRealClass().getSimpleName() : "Unknown";
+        String testId = "TC-" + String.format("%04d", rowIndex);
+        
+        row.createCell(0).setCellValue(testId);
+        row.createCell(1).setCellValue(module);
+        row.createCell(2).setCellValue(result.getName());
+        row.createCell(3).setCellValue(status);
+        row.createCell(4).setCellValue(result.getEndMillis() - result.getStartMillis());
+        
         if (result.getThrowable() != null) {
-            row.createCell(2).setCellValue(result.getThrowable().getMessage());
+            row.createCell(5).setCellValue(result.getThrowable().getMessage());
+        } else {
+            row.createCell(5).setCellValue("N/A");
         }
     }
 
