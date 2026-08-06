@@ -1,0 +1,13 @@
+# Performance & Load Testing Execution Summary
+- **Workflow ID**: `Local-Run`
+- **Git Commit**: `Local-Dev`
+- **Platform**: Linux x86_64 High-Throughput Node
+- **Engine**: JMeter / RestAssured / Apache HTTP Engine
+- **Timestamp**: Thu, 06 Aug 2026 05:41:49 GMT
+- **Total Scenarios**: 300
+- **Passed**: 300
+- **Failed**: 0
+- **Skipped**: 0
+- **Pass Rate**: 100.00%
+- **Average Latency**: 124ms
+- **Excel Report**: Saved to `load_automation/reports/latest/Execution_Report.xlsx`

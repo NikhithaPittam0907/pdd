@@ -1,0 +1,14 @@
+{
+  "name": "load-automation",
+  "version": "1.0.0",
+  "description": "Load & Performance Testing Framework for LexisAI",
+  "main": "index.js",
+  "scripts": {
+    "test": "mvn clean test -Dsurefire.suiteXmlFiles=testng.xml",
+    "generate-tests": "node generate_tests.js",
+    "report": "node generate_report.js"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0"
+  }
+}

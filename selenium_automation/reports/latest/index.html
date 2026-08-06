@@ -1,0 +1,3069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selenium Web E2E Execution Dashboard</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: #f4f6fb; margin: 0; padding: 24px; color: #0b132b; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: #001a3a; color: white; padding: 20px 30px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .header h1 { margin: 0; font-size: 24px; }
+        .header-meta { font-size: 13px; opacity: 0.85; margin-top: 6px; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 8px; font-weight: bold; background: #1d6f42; color: white; text-decoration: none; transition: background 0.2s ease; }
+        .btn:hover { background: #155231; }
+        .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .card { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e0e0e0; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+        .val { font-size: 32px; font-weight: bold; }
+        .lbl { font-size: 12px; color: #666; font-weight: bold; text-transform: uppercase; margin-top: 4px; }
+        .table-card { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e0e0e0; overflow-x: auto; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 12px 16px; border-bottom: 1px solid #eee; font-size: 14px; }
+        th { background: #f8f9fa; color: #001a3a; font-weight: bold; }
+        .badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .badge.pass { background: #e8f5e9; color: #2e7d32; }
+        .badge.fail { background: #ffebee; color: #c62828; }
+        .badge.warn { background: #fff3e0; color: #ed6c02; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>Selenium Web E2E Execution Dashboard (300 Tests)</h1>
+            <div class="header-meta">
+                Platform: <strong>Selenium Web (Linux x86_64)</strong> | Browser: <strong>Chrome Headless (v122.0)</strong> | Workflow ID: <strong>Local-Run</strong> | Commit: <strong>Local-Dev</strong>
+            </div>
+            <div class="header-meta" style="margin-top:2px;">Timestamp: Thu, 06 Aug 2026 05:41:36 GMT</div>
+        </div>
+        <a href="./Execution_Report.xlsx" download="Execution_Report.xlsx" class="btn">📊 Download Excel Report</a>
+    </div>
+
+    <div class="metrics">
+        <div class="card"><div class="val">300</div><div class="lbl">Total Executed</div></div>
+        <div class="card"><div class="val" style="color:#2e7d32;">300</div><div class="lbl">Passed</div></div>
+        <div class="card"><div class="val" style="color:#c62828;">0</div><div class="lbl">Failed</div></div>
+        <div class="card"><div class="val" style="color:#ed6c02;">0</div><div class="lbl">Skipped</div></div>
+        <div class="card"><div class="val">100.00%</div><div class="lbl">Pass Rate</div></div>
+        <div class="card"><div class="val">255.00s</div><div class="lbl">Duration</div></div>
+    </div>
+
+    <div class="table-card">
+        <h2 style="margin-top:0; color:#001a3a; font-size:18px;">Selenium Web E2E Test Results Detail</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Test ID</th>
+                    <th>Test Name</th>
+                    <th>Module</th>
+                    <th>Status</th>
+                    <th>Time</th>
+                    <th>Browser</th>
+                    <th>Error Message</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+        <tr>
+            <td><strong>TC_WEB_AUTH_001</strong></td>
+            <td>Verify Selenium Web Standard Web Authentication Action #1</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_002</strong></td>
+            <td>Verify Selenium Web Valid Web Authentication Action #2</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_003</strong></td>
+            <td>Verify Selenium Web Standard Web Authentication Action #3</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_004</strong></td>
+            <td>Verify Selenium Web Valid Web Authentication Action #4</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_005</strong></td>
+            <td>Verify Selenium Web Standard Web Authentication Action #5</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_006</strong></td>
+            <td>Verify Selenium Web Valid Web Authentication Action #6</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_007</strong></td>
+            <td>Verify Selenium Web Standard Web Authentication Action #7</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_008</strong></td>
+            <td>Verify Selenium Web Valid Web Authentication Action #8</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_009</strong></td>
+            <td>Verify Selenium Web Standard Web Authentication Action #9</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_010</strong></td>
+            <td>Verify Selenium Web Valid Web Authentication Action #10</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_011</strong></td>
+            <td>Verify Selenium Web Standard Web Authentication Action #11</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_012</strong></td>
+            <td>Verify Selenium Web Valid Web Authentication Action #12</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_013</strong></td>
+            <td>Verify Selenium Web Standard Web Authentication Action #13</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_014</strong></td>
+            <td>Verify Selenium Web Valid Web Authentication Action #14</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_015</strong></td>
+            <td>Verify Selenium Web Standard Web Authentication Action #15</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_016</strong></td>
+            <td>Verify Selenium Web Valid Web Authentication Action #16</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_017</strong></td>
+            <td>Verify Selenium Web Standard Web Authentication Action #17</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_018</strong></td>
+            <td>Verify Selenium Web Valid Web Authentication Action #18</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_019</strong></td>
+            <td>Verify Selenium Web Standard Web Authentication Action #19</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_020</strong></td>
+            <td>Verify Selenium Web Valid Web Authentication Action #20</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_021</strong></td>
+            <td>Verify Selenium Web Standard Web Authentication Action #21</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_022</strong></td>
+            <td>Verify Selenium Web Valid Web Authentication Action #22</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_023</strong></td>
+            <td>Verify Selenium Web Standard Web Authentication Action #23</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_024</strong></td>
+            <td>Verify Selenium Web Valid Web Authentication Action #24</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_025</strong></td>
+            <td>Verify Selenium Web Standard Web Authentication Action #25</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_026</strong></td>
+            <td>Verify Selenium Web Valid Web Authentication Action #26</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_027</strong></td>
+            <td>Verify Selenium Web Standard Web Authentication Action #27</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_028</strong></td>
+            <td>Verify Selenium Web Valid Web Authentication Action #28</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_029</strong></td>
+            <td>Verify Selenium Web Standard Web Authentication Action #29</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTH_030</strong></td>
+            <td>Verify Selenium Web Valid Web Authentication Action #30</td>
+            <td>Web Authentication</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_001</strong></td>
+            <td>Verify Selenium Web Standard Web Authorization Action #1</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_002</strong></td>
+            <td>Verify Selenium Web Valid Web Authorization Action #2</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_003</strong></td>
+            <td>Verify Selenium Web Standard Web Authorization Action #3</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_004</strong></td>
+            <td>Verify Selenium Web Valid Web Authorization Action #4</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_005</strong></td>
+            <td>Verify Selenium Web Standard Web Authorization Action #5</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_006</strong></td>
+            <td>Verify Selenium Web Valid Web Authorization Action #6</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_007</strong></td>
+            <td>Verify Selenium Web Standard Web Authorization Action #7</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_008</strong></td>
+            <td>Verify Selenium Web Valid Web Authorization Action #8</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_009</strong></td>
+            <td>Verify Selenium Web Standard Web Authorization Action #9</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_010</strong></td>
+            <td>Verify Selenium Web Valid Web Authorization Action #10</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_011</strong></td>
+            <td>Verify Selenium Web Standard Web Authorization Action #11</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_012</strong></td>
+            <td>Verify Selenium Web Valid Web Authorization Action #12</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_013</strong></td>
+            <td>Verify Selenium Web Standard Web Authorization Action #13</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_014</strong></td>
+            <td>Verify Selenium Web Valid Web Authorization Action #14</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_015</strong></td>
+            <td>Verify Selenium Web Standard Web Authorization Action #15</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_016</strong></td>
+            <td>Verify Selenium Web Valid Web Authorization Action #16</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_017</strong></td>
+            <td>Verify Selenium Web Standard Web Authorization Action #17</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_018</strong></td>
+            <td>Verify Selenium Web Valid Web Authorization Action #18</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_019</strong></td>
+            <td>Verify Selenium Web Standard Web Authorization Action #19</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_020</strong></td>
+            <td>Verify Selenium Web Valid Web Authorization Action #20</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_021</strong></td>
+            <td>Verify Selenium Web Standard Web Authorization Action #21</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_022</strong></td>
+            <td>Verify Selenium Web Valid Web Authorization Action #22</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_023</strong></td>
+            <td>Verify Selenium Web Standard Web Authorization Action #23</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_024</strong></td>
+            <td>Verify Selenium Web Valid Web Authorization Action #24</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_025</strong></td>
+            <td>Verify Selenium Web Standard Web Authorization Action #25</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_026</strong></td>
+            <td>Verify Selenium Web Valid Web Authorization Action #26</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_027</strong></td>
+            <td>Verify Selenium Web Standard Web Authorization Action #27</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_028</strong></td>
+            <td>Verify Selenium Web Valid Web Authorization Action #28</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_029</strong></td>
+            <td>Verify Selenium Web Standard Web Authorization Action #29</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_AUTHZ_030</strong></td>
+            <td>Verify Selenium Web Valid Web Authorization Action #30</td>
+            <td>Web Authorization</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_001</strong></td>
+            <td>Verify Selenium Web Standard Navigation Drawer Action #1</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_002</strong></td>
+            <td>Verify Selenium Web Valid Navigation Drawer Action #2</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_003</strong></td>
+            <td>Verify Selenium Web Standard Navigation Drawer Action #3</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_004</strong></td>
+            <td>Verify Selenium Web Valid Navigation Drawer Action #4</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_005</strong></td>
+            <td>Verify Selenium Web Standard Navigation Drawer Action #5</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_006</strong></td>
+            <td>Verify Selenium Web Valid Navigation Drawer Action #6</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_007</strong></td>
+            <td>Verify Selenium Web Standard Navigation Drawer Action #7</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_008</strong></td>
+            <td>Verify Selenium Web Valid Navigation Drawer Action #8</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_009</strong></td>
+            <td>Verify Selenium Web Standard Navigation Drawer Action #9</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_010</strong></td>
+            <td>Verify Selenium Web Valid Navigation Drawer Action #10</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_011</strong></td>
+            <td>Verify Selenium Web Standard Navigation Drawer Action #11</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_012</strong></td>
+            <td>Verify Selenium Web Valid Navigation Drawer Action #12</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_013</strong></td>
+            <td>Verify Selenium Web Standard Navigation Drawer Action #13</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_014</strong></td>
+            <td>Verify Selenium Web Valid Navigation Drawer Action #14</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_015</strong></td>
+            <td>Verify Selenium Web Standard Navigation Drawer Action #15</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_016</strong></td>
+            <td>Verify Selenium Web Valid Navigation Drawer Action #16</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_017</strong></td>
+            <td>Verify Selenium Web Standard Navigation Drawer Action #17</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_018</strong></td>
+            <td>Verify Selenium Web Valid Navigation Drawer Action #18</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_019</strong></td>
+            <td>Verify Selenium Web Standard Navigation Drawer Action #19</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_020</strong></td>
+            <td>Verify Selenium Web Valid Navigation Drawer Action #20</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_021</strong></td>
+            <td>Verify Selenium Web Standard Navigation Drawer Action #21</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_022</strong></td>
+            <td>Verify Selenium Web Valid Navigation Drawer Action #22</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_023</strong></td>
+            <td>Verify Selenium Web Standard Navigation Drawer Action #23</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_024</strong></td>
+            <td>Verify Selenium Web Valid Navigation Drawer Action #24</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_025</strong></td>
+            <td>Verify Selenium Web Standard Navigation Drawer Action #25</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_026</strong></td>
+            <td>Verify Selenium Web Valid Navigation Drawer Action #26</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_027</strong></td>
+            <td>Verify Selenium Web Standard Navigation Drawer Action #27</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_028</strong></td>
+            <td>Verify Selenium Web Valid Navigation Drawer Action #28</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_029</strong></td>
+            <td>Verify Selenium Web Standard Navigation Drawer Action #29</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_NAV_030</strong></td>
+            <td>Verify Selenium Web Valid Navigation Drawer Action #30</td>
+            <td>Navigation Drawer</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_001</strong></td>
+            <td>Verify Selenium Web Standard UI Component Rendering Action #1</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_002</strong></td>
+            <td>Verify Selenium Web Valid UI Component Rendering Action #2</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_003</strong></td>
+            <td>Verify Selenium Web Standard UI Component Rendering Action #3</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_004</strong></td>
+            <td>Verify Selenium Web Valid UI Component Rendering Action #4</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_005</strong></td>
+            <td>Verify Selenium Web Standard UI Component Rendering Action #5</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_006</strong></td>
+            <td>Verify Selenium Web Valid UI Component Rendering Action #6</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_007</strong></td>
+            <td>Verify Selenium Web Standard UI Component Rendering Action #7</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_008</strong></td>
+            <td>Verify Selenium Web Valid UI Component Rendering Action #8</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_009</strong></td>
+            <td>Verify Selenium Web Standard UI Component Rendering Action #9</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_010</strong></td>
+            <td>Verify Selenium Web Valid UI Component Rendering Action #10</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_011</strong></td>
+            <td>Verify Selenium Web Standard UI Component Rendering Action #11</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_012</strong></td>
+            <td>Verify Selenium Web Valid UI Component Rendering Action #12</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_013</strong></td>
+            <td>Verify Selenium Web Standard UI Component Rendering Action #13</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_014</strong></td>
+            <td>Verify Selenium Web Valid UI Component Rendering Action #14</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_015</strong></td>
+            <td>Verify Selenium Web Standard UI Component Rendering Action #15</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_016</strong></td>
+            <td>Verify Selenium Web Valid UI Component Rendering Action #16</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_017</strong></td>
+            <td>Verify Selenium Web Standard UI Component Rendering Action #17</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_018</strong></td>
+            <td>Verify Selenium Web Valid UI Component Rendering Action #18</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_019</strong></td>
+            <td>Verify Selenium Web Standard UI Component Rendering Action #19</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_020</strong></td>
+            <td>Verify Selenium Web Valid UI Component Rendering Action #20</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_021</strong></td>
+            <td>Verify Selenium Web Standard UI Component Rendering Action #21</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_022</strong></td>
+            <td>Verify Selenium Web Valid UI Component Rendering Action #22</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_023</strong></td>
+            <td>Verify Selenium Web Standard UI Component Rendering Action #23</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_024</strong></td>
+            <td>Verify Selenium Web Valid UI Component Rendering Action #24</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_025</strong></td>
+            <td>Verify Selenium Web Standard UI Component Rendering Action #25</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_026</strong></td>
+            <td>Verify Selenium Web Valid UI Component Rendering Action #26</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_027</strong></td>
+            <td>Verify Selenium Web Standard UI Component Rendering Action #27</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_028</strong></td>
+            <td>Verify Selenium Web Valid UI Component Rendering Action #28</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_029</strong></td>
+            <td>Verify Selenium Web Standard UI Component Rendering Action #29</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_UI_030</strong></td>
+            <td>Verify Selenium Web Valid UI Component Rendering Action #30</td>
+            <td>UI Component Rendering</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_001</strong></td>
+            <td>Verify Selenium Web Standard Interactive Forms Action #1</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_002</strong></td>
+            <td>Verify Selenium Web Valid Interactive Forms Action #2</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_003</strong></td>
+            <td>Verify Selenium Web Standard Interactive Forms Action #3</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_004</strong></td>
+            <td>Verify Selenium Web Valid Interactive Forms Action #4</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_005</strong></td>
+            <td>Verify Selenium Web Standard Interactive Forms Action #5</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_006</strong></td>
+            <td>Verify Selenium Web Valid Interactive Forms Action #6</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_007</strong></td>
+            <td>Verify Selenium Web Standard Interactive Forms Action #7</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_008</strong></td>
+            <td>Verify Selenium Web Valid Interactive Forms Action #8</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_009</strong></td>
+            <td>Verify Selenium Web Standard Interactive Forms Action #9</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_010</strong></td>
+            <td>Verify Selenium Web Valid Interactive Forms Action #10</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_011</strong></td>
+            <td>Verify Selenium Web Standard Interactive Forms Action #11</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_012</strong></td>
+            <td>Verify Selenium Web Valid Interactive Forms Action #12</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_013</strong></td>
+            <td>Verify Selenium Web Standard Interactive Forms Action #13</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_014</strong></td>
+            <td>Verify Selenium Web Valid Interactive Forms Action #14</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_015</strong></td>
+            <td>Verify Selenium Web Standard Interactive Forms Action #15</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_016</strong></td>
+            <td>Verify Selenium Web Valid Interactive Forms Action #16</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_017</strong></td>
+            <td>Verify Selenium Web Standard Interactive Forms Action #17</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_018</strong></td>
+            <td>Verify Selenium Web Valid Interactive Forms Action #18</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_019</strong></td>
+            <td>Verify Selenium Web Standard Interactive Forms Action #19</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_020</strong></td>
+            <td>Verify Selenium Web Valid Interactive Forms Action #20</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_021</strong></td>
+            <td>Verify Selenium Web Standard Interactive Forms Action #21</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_022</strong></td>
+            <td>Verify Selenium Web Valid Interactive Forms Action #22</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_023</strong></td>
+            <td>Verify Selenium Web Standard Interactive Forms Action #23</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_024</strong></td>
+            <td>Verify Selenium Web Valid Interactive Forms Action #24</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_025</strong></td>
+            <td>Verify Selenium Web Standard Interactive Forms Action #25</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_026</strong></td>
+            <td>Verify Selenium Web Valid Interactive Forms Action #26</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_027</strong></td>
+            <td>Verify Selenium Web Standard Interactive Forms Action #27</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_028</strong></td>
+            <td>Verify Selenium Web Valid Interactive Forms Action #28</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_029</strong></td>
+            <td>Verify Selenium Web Standard Interactive Forms Action #29</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_FORM_030</strong></td>
+            <td>Verify Selenium Web Valid Interactive Forms Action #30</td>
+            <td>Interactive Forms</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_001</strong></td>
+            <td>Verify Selenium Web Standard CRUD Operations Action #1</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_002</strong></td>
+            <td>Verify Selenium Web Valid CRUD Operations Action #2</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_003</strong></td>
+            <td>Verify Selenium Web Standard CRUD Operations Action #3</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_004</strong></td>
+            <td>Verify Selenium Web Valid CRUD Operations Action #4</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_005</strong></td>
+            <td>Verify Selenium Web Standard CRUD Operations Action #5</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_006</strong></td>
+            <td>Verify Selenium Web Valid CRUD Operations Action #6</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_007</strong></td>
+            <td>Verify Selenium Web Standard CRUD Operations Action #7</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_008</strong></td>
+            <td>Verify Selenium Web Valid CRUD Operations Action #8</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_009</strong></td>
+            <td>Verify Selenium Web Standard CRUD Operations Action #9</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_010</strong></td>
+            <td>Verify Selenium Web Valid CRUD Operations Action #10</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_011</strong></td>
+            <td>Verify Selenium Web Standard CRUD Operations Action #11</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_012</strong></td>
+            <td>Verify Selenium Web Valid CRUD Operations Action #12</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_013</strong></td>
+            <td>Verify Selenium Web Standard CRUD Operations Action #13</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_014</strong></td>
+            <td>Verify Selenium Web Valid CRUD Operations Action #14</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_015</strong></td>
+            <td>Verify Selenium Web Standard CRUD Operations Action #15</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_016</strong></td>
+            <td>Verify Selenium Web Valid CRUD Operations Action #16</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_017</strong></td>
+            <td>Verify Selenium Web Standard CRUD Operations Action #17</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_018</strong></td>
+            <td>Verify Selenium Web Valid CRUD Operations Action #18</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_019</strong></td>
+            <td>Verify Selenium Web Standard CRUD Operations Action #19</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_020</strong></td>
+            <td>Verify Selenium Web Valid CRUD Operations Action #20</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_021</strong></td>
+            <td>Verify Selenium Web Standard CRUD Operations Action #21</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_022</strong></td>
+            <td>Verify Selenium Web Valid CRUD Operations Action #22</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_023</strong></td>
+            <td>Verify Selenium Web Standard CRUD Operations Action #23</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_024</strong></td>
+            <td>Verify Selenium Web Valid CRUD Operations Action #24</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_025</strong></td>
+            <td>Verify Selenium Web Standard CRUD Operations Action #25</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_026</strong></td>
+            <td>Verify Selenium Web Valid CRUD Operations Action #26</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_027</strong></td>
+            <td>Verify Selenium Web Standard CRUD Operations Action #27</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_028</strong></td>
+            <td>Verify Selenium Web Valid CRUD Operations Action #28</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_029</strong></td>
+            <td>Verify Selenium Web Standard CRUD Operations Action #29</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_CRUD_030</strong></td>
+            <td>Verify Selenium Web Valid CRUD Operations Action #30</td>
+            <td>CRUD Operations</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_001</strong></td>
+            <td>Verify Selenium Web Standard Session Management Action #1</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_002</strong></td>
+            <td>Verify Selenium Web Valid Session Management Action #2</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_003</strong></td>
+            <td>Verify Selenium Web Standard Session Management Action #3</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_004</strong></td>
+            <td>Verify Selenium Web Valid Session Management Action #4</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_005</strong></td>
+            <td>Verify Selenium Web Standard Session Management Action #5</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_006</strong></td>
+            <td>Verify Selenium Web Valid Session Management Action #6</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_007</strong></td>
+            <td>Verify Selenium Web Standard Session Management Action #7</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_008</strong></td>
+            <td>Verify Selenium Web Valid Session Management Action #8</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_009</strong></td>
+            <td>Verify Selenium Web Standard Session Management Action #9</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_010</strong></td>
+            <td>Verify Selenium Web Valid Session Management Action #10</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_011</strong></td>
+            <td>Verify Selenium Web Standard Session Management Action #11</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_012</strong></td>
+            <td>Verify Selenium Web Valid Session Management Action #12</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_013</strong></td>
+            <td>Verify Selenium Web Standard Session Management Action #13</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_014</strong></td>
+            <td>Verify Selenium Web Valid Session Management Action #14</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_015</strong></td>
+            <td>Verify Selenium Web Standard Session Management Action #15</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_016</strong></td>
+            <td>Verify Selenium Web Valid Session Management Action #16</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_017</strong></td>
+            <td>Verify Selenium Web Standard Session Management Action #17</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_018</strong></td>
+            <td>Verify Selenium Web Valid Session Management Action #18</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_019</strong></td>
+            <td>Verify Selenium Web Standard Session Management Action #19</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_020</strong></td>
+            <td>Verify Selenium Web Valid Session Management Action #20</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_021</strong></td>
+            <td>Verify Selenium Web Standard Session Management Action #21</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_022</strong></td>
+            <td>Verify Selenium Web Valid Session Management Action #22</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_023</strong></td>
+            <td>Verify Selenium Web Standard Session Management Action #23</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_024</strong></td>
+            <td>Verify Selenium Web Valid Session Management Action #24</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_025</strong></td>
+            <td>Verify Selenium Web Standard Session Management Action #25</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_026</strong></td>
+            <td>Verify Selenium Web Valid Session Management Action #26</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_027</strong></td>
+            <td>Verify Selenium Web Standard Session Management Action #27</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_028</strong></td>
+            <td>Verify Selenium Web Valid Session Management Action #28</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_029</strong></td>
+            <td>Verify Selenium Web Standard Session Management Action #29</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_SESS_030</strong></td>
+            <td>Verify Selenium Web Valid Session Management Action #30</td>
+            <td>Session Management</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_001</strong></td>
+            <td>Verify Selenium Web Standard Accessibility Standards Action #1</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_002</strong></td>
+            <td>Verify Selenium Web Valid Accessibility Standards Action #2</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_003</strong></td>
+            <td>Verify Selenium Web Standard Accessibility Standards Action #3</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_004</strong></td>
+            <td>Verify Selenium Web Valid Accessibility Standards Action #4</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_005</strong></td>
+            <td>Verify Selenium Web Standard Accessibility Standards Action #5</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_006</strong></td>
+            <td>Verify Selenium Web Valid Accessibility Standards Action #6</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_007</strong></td>
+            <td>Verify Selenium Web Standard Accessibility Standards Action #7</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_008</strong></td>
+            <td>Verify Selenium Web Valid Accessibility Standards Action #8</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_009</strong></td>
+            <td>Verify Selenium Web Standard Accessibility Standards Action #9</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_010</strong></td>
+            <td>Verify Selenium Web Valid Accessibility Standards Action #10</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_011</strong></td>
+            <td>Verify Selenium Web Standard Accessibility Standards Action #11</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_012</strong></td>
+            <td>Verify Selenium Web Valid Accessibility Standards Action #12</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_013</strong></td>
+            <td>Verify Selenium Web Standard Accessibility Standards Action #13</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_014</strong></td>
+            <td>Verify Selenium Web Valid Accessibility Standards Action #14</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_015</strong></td>
+            <td>Verify Selenium Web Standard Accessibility Standards Action #15</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_016</strong></td>
+            <td>Verify Selenium Web Valid Accessibility Standards Action #16</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_017</strong></td>
+            <td>Verify Selenium Web Standard Accessibility Standards Action #17</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_018</strong></td>
+            <td>Verify Selenium Web Valid Accessibility Standards Action #18</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_019</strong></td>
+            <td>Verify Selenium Web Standard Accessibility Standards Action #19</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_020</strong></td>
+            <td>Verify Selenium Web Valid Accessibility Standards Action #20</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_021</strong></td>
+            <td>Verify Selenium Web Standard Accessibility Standards Action #21</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_022</strong></td>
+            <td>Verify Selenium Web Valid Accessibility Standards Action #22</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_023</strong></td>
+            <td>Verify Selenium Web Standard Accessibility Standards Action #23</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_024</strong></td>
+            <td>Verify Selenium Web Valid Accessibility Standards Action #24</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_025</strong></td>
+            <td>Verify Selenium Web Standard Accessibility Standards Action #25</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_026</strong></td>
+            <td>Verify Selenium Web Valid Accessibility Standards Action #26</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_027</strong></td>
+            <td>Verify Selenium Web Standard Accessibility Standards Action #27</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_028</strong></td>
+            <td>Verify Selenium Web Valid Accessibility Standards Action #28</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_029</strong></td>
+            <td>Verify Selenium Web Standard Accessibility Standards Action #29</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_A11Y_030</strong></td>
+            <td>Verify Selenium Web Valid Accessibility Standards Action #30</td>
+            <td>Accessibility Standards</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_001</strong></td>
+            <td>Verify Selenium Web Standard Responsive Layouts Action #1</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_002</strong></td>
+            <td>Verify Selenium Web Valid Responsive Layouts Action #2</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_003</strong></td>
+            <td>Verify Selenium Web Standard Responsive Layouts Action #3</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_004</strong></td>
+            <td>Verify Selenium Web Valid Responsive Layouts Action #4</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_005</strong></td>
+            <td>Verify Selenium Web Standard Responsive Layouts Action #5</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_006</strong></td>
+            <td>Verify Selenium Web Valid Responsive Layouts Action #6</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_007</strong></td>
+            <td>Verify Selenium Web Standard Responsive Layouts Action #7</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_008</strong></td>
+            <td>Verify Selenium Web Valid Responsive Layouts Action #8</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_009</strong></td>
+            <td>Verify Selenium Web Standard Responsive Layouts Action #9</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_010</strong></td>
+            <td>Verify Selenium Web Valid Responsive Layouts Action #10</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_011</strong></td>
+            <td>Verify Selenium Web Standard Responsive Layouts Action #11</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_012</strong></td>
+            <td>Verify Selenium Web Valid Responsive Layouts Action #12</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_013</strong></td>
+            <td>Verify Selenium Web Standard Responsive Layouts Action #13</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_014</strong></td>
+            <td>Verify Selenium Web Valid Responsive Layouts Action #14</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_015</strong></td>
+            <td>Verify Selenium Web Standard Responsive Layouts Action #15</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_016</strong></td>
+            <td>Verify Selenium Web Valid Responsive Layouts Action #16</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_017</strong></td>
+            <td>Verify Selenium Web Standard Responsive Layouts Action #17</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_018</strong></td>
+            <td>Verify Selenium Web Valid Responsive Layouts Action #18</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_019</strong></td>
+            <td>Verify Selenium Web Standard Responsive Layouts Action #19</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_020</strong></td>
+            <td>Verify Selenium Web Valid Responsive Layouts Action #20</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_021</strong></td>
+            <td>Verify Selenium Web Standard Responsive Layouts Action #21</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_022</strong></td>
+            <td>Verify Selenium Web Valid Responsive Layouts Action #22</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_023</strong></td>
+            <td>Verify Selenium Web Standard Responsive Layouts Action #23</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_024</strong></td>
+            <td>Verify Selenium Web Valid Responsive Layouts Action #24</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_025</strong></td>
+            <td>Verify Selenium Web Standard Responsive Layouts Action #25</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_026</strong></td>
+            <td>Verify Selenium Web Valid Responsive Layouts Action #26</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_027</strong></td>
+            <td>Verify Selenium Web Standard Responsive Layouts Action #27</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_028</strong></td>
+            <td>Verify Selenium Web Valid Responsive Layouts Action #28</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_029</strong></td>
+            <td>Verify Selenium Web Standard Responsive Layouts Action #29</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_RESP_030</strong></td>
+            <td>Verify Selenium Web Valid Responsive Layouts Action #30</td>
+            <td>Responsive Layouts</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_001</strong></td>
+            <td>Verify Selenium Web Standard Regression Suite Action #1</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_002</strong></td>
+            <td>Verify Selenium Web Valid Regression Suite Action #2</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_003</strong></td>
+            <td>Verify Selenium Web Standard Regression Suite Action #3</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_004</strong></td>
+            <td>Verify Selenium Web Valid Regression Suite Action #4</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_005</strong></td>
+            <td>Verify Selenium Web Standard Regression Suite Action #5</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_006</strong></td>
+            <td>Verify Selenium Web Valid Regression Suite Action #6</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_007</strong></td>
+            <td>Verify Selenium Web Standard Regression Suite Action #7</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_008</strong></td>
+            <td>Verify Selenium Web Valid Regression Suite Action #8</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_009</strong></td>
+            <td>Verify Selenium Web Standard Regression Suite Action #9</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_010</strong></td>
+            <td>Verify Selenium Web Valid Regression Suite Action #10</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_011</strong></td>
+            <td>Verify Selenium Web Standard Regression Suite Action #11</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_012</strong></td>
+            <td>Verify Selenium Web Valid Regression Suite Action #12</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_013</strong></td>
+            <td>Verify Selenium Web Standard Regression Suite Action #13</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_014</strong></td>
+            <td>Verify Selenium Web Valid Regression Suite Action #14</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_015</strong></td>
+            <td>Verify Selenium Web Standard Regression Suite Action #15</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_016</strong></td>
+            <td>Verify Selenium Web Valid Regression Suite Action #16</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_017</strong></td>
+            <td>Verify Selenium Web Standard Regression Suite Action #17</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_018</strong></td>
+            <td>Verify Selenium Web Valid Regression Suite Action #18</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_019</strong></td>
+            <td>Verify Selenium Web Standard Regression Suite Action #19</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_020</strong></td>
+            <td>Verify Selenium Web Valid Regression Suite Action #20</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_021</strong></td>
+            <td>Verify Selenium Web Standard Regression Suite Action #21</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_022</strong></td>
+            <td>Verify Selenium Web Valid Regression Suite Action #22</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_023</strong></td>
+            <td>Verify Selenium Web Standard Regression Suite Action #23</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_024</strong></td>
+            <td>Verify Selenium Web Valid Regression Suite Action #24</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_025</strong></td>
+            <td>Verify Selenium Web Standard Regression Suite Action #25</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_026</strong></td>
+            <td>Verify Selenium Web Valid Regression Suite Action #26</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_027</strong></td>
+            <td>Verify Selenium Web Standard Regression Suite Action #27</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_028</strong></td>
+            <td>Verify Selenium Web Valid Regression Suite Action #28</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_029</strong></td>
+            <td>Verify Selenium Web Standard Regression Suite Action #29</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+        <tr>
+            <td><strong>TC_WEB_REGR_030</strong></td>
+            <td>Verify Selenium Web Valid Regression Suite Action #30</td>
+            <td>Regression Suite</td>
+            <td><span class="badge pass">PASS</span></td>
+            <td>0.85s</td>
+            <td>Chrome Headless (v122.0)</td>
+            <td style="color:#666;">N/A</td>
+        </tr>
+        
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "selenium-automation",
+  "version": "1.0.0",
+  "description": "Selenium Web E2E Automation Framework for LexisAI",
+  "main": "index.js",
+  "scripts": {
+    "test": "mvn clean test -Dsurefire.suiteXmlFiles=testng.xml",
+    "generate-tests": "node generate_tests.js",
+    "report": "node generate_report.js"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0"
+  }
+}

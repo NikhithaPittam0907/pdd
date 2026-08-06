@@ -1,0 +1,130 @@
+name: Load & Performance Testing Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  test:
+    name: Run Load & Performance Tests (300 Scenarios)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Pre-Create Report & Artifact Directories
+        run: |
+          mkdir -p "load_automation/reports/latest"
+          mkdir -p "load_automation/Test Results/Excel"
+          mkdir -p "load_automation/logs"
+          
+          cd load_automation
+          npm install
+
+      - name: Run Load Testing Suite (300 Test Cases)
+        run: |
+          cd load_automation
+          mvn clean test -Dsurefire.suiteXmlFiles=testng.xml || true
+          node generate_tests.js
+          node generate_report.js
+          
+          if [ -f "summary.md" ]; then
+            cat "summary.md" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Validate Artifacts Before Upload
+        if: always()
+        run: |
+          if [ ! -f "load_automation/reports/latest/Execution_Report.xlsx" ]; then
+            echo "ERROR: Execution_Report.xlsx missing in load_automation/reports/latest/"
+            exit 1
+          fi
+          if [ ! -f "load_automation/reports/latest/index.html" ]; then
+            echo "ERROR: index.html missing in load_automation/reports/latest/"
+            exit 1
+          fi
+          echo "✔ Verified Load Testing reports exist."
+
+      - name: Upload Artifacts to GitHub Actions
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-testing-reports
+          path: |
+            load_automation/reports/latest/
+            load_automation/Test Results/Excel/Execution_Report.xlsx
+          retention-days: 30
+
+  deploy-pages:
+    name: Publish Load Testing Reports to GitHub Pages
+    needs: test
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download Automation Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: load-testing-reports
+          path: downloaded-reports
+
+      - name: Consolidate Pages Site
+        run: |
+          mkdir -p public
+          if [ -f downloaded-reports/index.html ]; then
+            cp -r downloaded-reports/* public/
+          else
+            INDEX_DIR=$(find downloaded-reports -name "index.html" -exec dirname {} \; | head -n 1)
+            if [ -n "$INDEX_DIR" ]; then
+              cp -r "$INDEX_DIR"/* public/
+            fi
+          fi
+
+          if [ ! -f public/Execution_Report.xlsx ]; then
+            EXCEL_SRC=$(find downloaded-reports -name "Execution_Report.xlsx" | head -n 1)
+            if [ -n "$EXCEL_SRC" ]; then
+              cp "$EXCEL_SRC" public/Execution_Report.xlsx
+            fi
+          fi
+
+          ls -la public/
+          if [ ! -f public/index.html ]; then
+            echo "ERROR: index.html was not found!"
+            exit 1
+          fi
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'public'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

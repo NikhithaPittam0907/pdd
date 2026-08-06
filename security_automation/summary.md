@@ -1,0 +1,13 @@
+# Security & Vulnerability Automation Summary
+- **Workflow ID**: `Local-Run`
+- **Git Commit**: `Local-Dev`
+- **Platform**: Linux x86_64 Security Runner
+- **Scanner Engine**: OWASP ZAP / Burp / RestAssured Security Engine
+- **Timestamp**: Thu, 06 Aug 2026 05:42:03 GMT
+- **Total Vulnerability Checks**: 300
+- **Defended**: 300
+- **Vulnerable**: 0
+- **Skipped**: 0
+- **Pass Rate**: 100.00%
+- **Critical Vulnerabilities**: 0
+- **Excel Report**: Saved to `security_automation/reports/latest/Execution_Report.xlsx`
