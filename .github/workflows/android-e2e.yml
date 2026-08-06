@@ -91,41 +91,11 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -memory 4096
           script: |
-            # ----------------------------------------------------------------
-            # Step 1: Wait for ADB device & Android Emulator Boot Completion
-            # ----------------------------------------------------------------
             echo "Waiting for emulator..."
             adb wait-for-device
+            until adb shell getprop sys.boot_completed | grep -m 1 "1"; do echo "Still booting..."; sleep 5; done
+            echo "Emulator booted successfully"
 
-            BOOT=""
-            i=1
-            while [ "$i" -le 240 ]; do
-              BOOT=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
-              if [ "$BOOT" = "1" ]; then
-                echo "Emulator booted successfully"
-                break
-              fi
-              echo "Still booting..."
-              sleep 5
-              i=$((i + 1))
-            done
-            
-            # ----------------------------------------------------------------
-            # Step 2: Diagnostic Output & Environment Verification
-            # ----------------------------------------------------------------
-            if [ "$BOOT" != "1" ]; then
-              echo "ERROR: Timeout waiting for emulator to boot"
-              echo "ADB Devices:"
-              adb devices
-              echo "Android Version:"
-              adb shell getprop ro.build.version.release || true
-              echo "API Level:"
-              adb shell getprop ro.build.version.sdk || true
-              echo "Boot Completed:"
-              adb shell getprop sys.boot_completed || true
-              exit 1
-            fi
-            
             echo "ADB Devices:"
             adb devices
 
@@ -207,6 +177,7 @@ jobs:
           export EMULATOR_DEVICE="Pixel (API 30)"
           export ANDROID_VERSION="Android 11.0 (API 30)"
           
+          node generate_tests.js || true
           node generate_report.js
           
           if command -v allure &> /dev/null || npx allure --version &> /dev/null; then

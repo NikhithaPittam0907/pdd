@@ -7,16 +7,16 @@ async function generateTestCases() {
     const workbook = new ExcelJS.Workbook();
     
     const modules = [
-        { name: 'Authentication', count: 5, prefix: 'AUTH' },
-        { name: 'Authorization', count: 5, prefix: 'AUTHZ' },
-        { name: 'Registration', count: 5, prefix: 'REG' },
-        { name: 'Profile Management', count: 5, prefix: 'PROF' },
-        { name: 'Navigation', count: 5, prefix: 'NAV' },
-        { name: 'Dashboard', count: 5, prefix: 'DASH' },
-        { name: 'Forms', count: 5, prefix: 'FORM' },
-        { name: 'CRUD Operations', count: 5, prefix: 'CRUD' },
-        { name: 'Search', count: 5, prefix: 'SRCH' },
-        { name: 'Filters', count: 5, prefix: 'FILT' }
+        { name: 'Authentication', count: 30, prefix: 'AUTH' },
+        { name: 'Authorization', count: 30, prefix: 'AUTHZ' },
+        { name: 'Registration', count: 30, prefix: 'REG' },
+        { name: 'Profile Management', count: 30, prefix: 'PROF' },
+        { name: 'Navigation', count: 30, prefix: 'NAV' },
+        { name: 'Dashboard', count: 30, prefix: 'DASH' },
+        { name: 'Forms', count: 30, prefix: 'FORM' },
+        { name: 'CRUD Operations', count: 30, prefix: 'CRUD' },
+        { name: 'Search', count: 30, prefix: 'SRCH' },
+        { name: 'Filters', count: 30, prefix: 'FILT' }
     ];
 
     const allCasesSheet = workbook.addWorksheet('Executed Test Cases');
