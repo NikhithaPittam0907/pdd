@@ -37,10 +37,13 @@ export const config: Options.Testrunner = {
         'appium:deviceName': process.env.EMULATOR_DEVICE || 'Android Emulator',
         'appium:automationName': 'UiAutomator2',
         'appium:app': apkPath,
+        'appium:appPackage': 'com.example.my_app',
+        'appium:appActivity': 'com.example.my_app.MainActivity',
         'appium:noReset': false,
         'appium:fullReset': false,
         'appium:autoGrantPermissions': true,
         'appium:newCommandTimeout': 240,
+        'appium:disableWindowAnimation': true,
     }],
     
     logLevel: 'info',

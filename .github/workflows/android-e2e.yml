@@ -79,142 +79,109 @@ jobs:
       - name: 7. Launch Android Emulator & Run Appium E2E Tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          # Stable Android Emulator Configuration (API 30, x86_64 Google APIs, Pixel 4 profile)
           api-level: 30
           target: google_apis
           arch: x86_64
-          profile: pixel_4
+          profile: pixel
           cores: 2
           ram-size: 4096M
           heap-size: 512M
           disk-size: 6000M
-          # Increase emulator boot timeout to 20 minutes (1200 seconds)
           emulator-boot-timeout: 1200
           disable-animations: true
-          # Optimized emulator boot parameters for headless CI execution
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -memory 4096
           script: |
             # ----------------------------------------------------------------
-            # Step 1: Wait for ADB device & Android Emulator Boot Completion (up to 20 mins)
+            # Step 1: Wait for ADB device & Android Emulator Boot Completion
             # ----------------------------------------------------------------
-            echo "=== 1. Verifying Android Emulator Boot Completion ==="
-            # Wait for ADB server to detect device
+            echo "Waiting for emulator..."
             adb wait-for-device
 
             BOOT=""
-            PROVISIONED=""
             i=1
-            # POSIX-compliant loop polling sys.boot_completed property up to 240 times (240 * 5s = 1200s / 20 min)
             while [ "$i" -le 240 ]; do
               BOOT=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
-              PROVISIONED=$(adb shell settings get global device_provisioned 2>/dev/null | tr -d '\r')
-              if [ "$BOOT" = "1" ] && [ "$PROVISIONED" = "1" ]; then
-                echo "✔ Android Emulator booted completely! (sys.boot_completed=1, device_provisioned=1)"
+              if [ "$BOOT" = "1" ]; then
+                echo "Emulator booted successfully"
                 break
               fi
-              echo "Waiting for Android system boot... ($i/240) [sys.boot_completed=$BOOT, device_provisioned=$PROVISIONED]"
+              echo "Still booting..."
               sleep 5
               i=$((i + 1))
             done
             
             # ----------------------------------------------------------------
-            # Step 2: Diagnostic Output & Error Handling on Emulator Boot Failure
+            # Step 2: Diagnostic Output & Environment Verification
             # ----------------------------------------------------------------
             if [ "$BOOT" != "1" ]; then
-              echo "ERROR: Android Emulator failed to complete boot sequence within 20-minute timeout!"
-              echo "=== Diagnostics: Connected ADB Devices ==="
+              echo "ERROR: Timeout waiting for emulator to boot"
+              echo "ADB Devices:"
               adb devices
-              echo "=== Diagnostics: Available AVDs ==="
-              emulator -list-avds 2>/dev/null || avdmanager list avd 2>/dev/null || echo "AVD list tool unavailable."
-              echo "=== Diagnostics: Emulator Logs ==="
-              cat ~/.android/avd/*.avd/emulator.log 2>/dev/null || cat ~/.android/avd/*.avd/*.log 2>/dev/null || echo "No emulator log file found."
-              echo "=== Diagnostics: Device Logcat Output ==="
-              adb logcat -d | tail -n 200 || echo "Unable to fetch logcat output."
-              echo "=== Diagnostics: Flutter Doctor Environment Check ==="
-              flutter doctor -v || echo "Unable to execute flutter doctor."
+              echo "Android Version:"
+              adb shell getprop ro.build.version.release || true
+              echo "API Level:"
+              adb shell getprop ro.build.version.sdk || true
+              echo "Boot Completed:"
+              adb shell getprop sys.boot_completed || true
               exit 1
             fi
             
+            echo "ADB Devices:"
+            adb devices
+
+            echo "Android Version:"
+            adb shell getprop ro.build.version.release
+
+            echo "API Level:"
+            adb shell getprop ro.build.version.sdk
+
+            echo "Boot Completed:"
+            adb shell getprop sys.boot_completed
+
             # ----------------------------------------------------------------
-            # Step 3: Unlock Emulator Screen & Verify Device Status
+            # Step 3: Optimize Settings & Unlock Screen
             # ----------------------------------------------------------------
-            echo "=== Unlocking Android Emulator Screen (Keyevent 82) ==="
+            adb shell settings put global window_animation_scale 0
+            adb shell settings put global transition_animation_scale 0
+            adb shell settings put global animator_duration_scale 0
             adb shell input keyevent 82
 
-            echo "=== Verifying ADB Device Status ==="
-            adb devices
-            adb shell getprop sys.boot_completed
-            adb shell settings get global device_provisioned
-
             # ----------------------------------------------------------------
-            # Step 4: Verify APK Existence & Perform Resilient Installation with Retry
+            # Step 4: Install Flutter APK onto Emulator
             # ----------------------------------------------------------------
-            echo "=== Verifying Flutter Debug APK File Existence ==="
             APK_PATH="build/app/outputs/flutter-apk/app-debug.apk"
             if [ ! -f "$APK_PATH" ]; then
               echo "ERROR: Flutter APK file not found at $APK_PATH!"
               exit 1
             fi
-            echo "✔ Found Flutter APK at: $APK_PATH"
+            echo "Installing APK onto Emulator..."
+            adb install -r "$APK_PATH"
 
-            echo "=== Installing Flutter APK onto Emulator (Retry on failure) ==="
-            INSTALLED=false
-            attempt=1
-            while [ "$attempt" -le 3 ]; do
-              echo "Installing APK (Attempt $attempt/3)..."
-              if adb install -r "$APK_PATH"; then
-                echo "✔ APK installed successfully on attempt $attempt!"
-                INSTALLED=true
-                break
-              fi
-              echo "WARNING: adb install failed on attempt $attempt. Retrying in 5 seconds..."
-              sleep 5
-              attempt=$((attempt + 1))
-            done
-
-            if [ "$INSTALLED" = "false" ]; then
-              echo "ERROR: Failed to install APK on emulator after 3 attempts."
-              echo "=== Diagnostics: Logcat Output ==="
-              adb logcat -d | tail -n 200 || true
-              exit 1
-            fi
-
-            echo "=== Verifying Installed Packages on Emulator ==="
-            adb shell pm list packages | grep com.example || adb shell pm list packages | grep pdd || echo "✔ App package listed on device."
+            echo "Verifying Installed Packages on Emulator:"
+            adb shell pm list packages | grep com.example || true
 
             # ----------------------------------------------------------------
-            # Step 5: Pre-flight Environment & Appium Driver Verification
+            # Step 5: Start Appium Server & Install Driver
             # ----------------------------------------------------------------
-            echo "=== 2. Pre-flight Environment & Driver Verification ==="
-            echo "JAVA_HOME: $JAVA_HOME"
-            echo "ANDROID_HOME: $ANDROID_HOME"
-            adb version
-            appium --version
-            
+            echo "Starting Appium"
             cd automation
-            echo "=== Installing UiAutomator2 Driver ==="
             npx appium driver install uiautomator2 || true
-            npx appium driver list
-
-            # ----------------------------------------------------------------
-            # Step 6: Start Appium Server (Only after emulator fully booted & APK verified)
-            # ----------------------------------------------------------------
-            echo "=== 3. Starting Appium Server ==="
-            npx appium --log logs/appium.log &
             
-            echo "=== 4. Verifying Appium Server Health ==="
+            npx appium > logs/appium.log 2>&1 &
+            
+            echo "Waiting for Appium Server Health Check..."
             HEALTHY=false
-            i=1
-            while [ "$i" -le 15 ]; do
+            j=1
+            while [ "$j" -le 15 ]; do
               STATUS=$(curl -s http://127.0.0.1:4723/status || true)
               if echo "$STATUS" | grep -q '"ready":true' || echo "$STATUS" | grep -q '"status":0'; then
                 echo "✔ Appium Server is HEALTHY and listening on port 4723!"
                 HEALTHY=true
                 break
               fi
-              echo "Waiting for Appium Server ($i/15)..."
+              echo "Waiting for Appium Server ($j/15)..."
               sleep 2
-              i=$((i + 1))
+              j=$((j + 1))
             done
 
             if [ "$HEALTHY" = "false" ]; then
@@ -224,11 +191,10 @@ jobs:
             fi
 
             # ----------------------------------------------------------------
-            # Step 7: Execute Appium E2E Automation Test Suite
+            # Step 6: Execute Appium WebdriverIO E2E Automation Suite
             # ----------------------------------------------------------------
-            echo "=== 5. Executing Appium E2E Automation Test Suite ==="
-            export EMULATOR_DEVICE="Pixel 4 (API 30)"
-            export ANDROID_VERSION="Android 11.0"
+            export EMULATOR_DEVICE="Pixel (API 30)"
+            export ANDROID_VERSION="Android 11.0 (API 30)"
             npm run wdio
 
       - name: 8. Generate Dynamic Reports (Excel, HTML, Allure, Markdown)
@@ -238,10 +204,9 @@ jobs:
           cd automation
           export GITHUB_RUN_ID="${{ github.run_id }}"
           export GITHUB_SHA="${{ github.sha }}"
-          export EMULATOR_DEVICE="Pixel 4 (API 30)"
+          export EMULATOR_DEVICE="Pixel (API 30)"
           export ANDROID_VERSION="Android 11.0 (API 30)"
           
-          node generate_tests.js || true
           node generate_report.js
           
           if command -v allure &> /dev/null || npx allure --version &> /dev/null; then
@@ -262,12 +227,10 @@ jobs:
           mkdir -p "automation/logs"
           mkdir -p "automation/allure-results"
           
-          # Copy Execution_Report.xlsx to reports/latest if missing
           if [ -f "automation/Test Results/Excel/Execution_Report.xlsx" ] && [ ! -f "automation/reports/latest/Execution_Report.xlsx" ]; then
             cp "automation/Test Results/Excel/Execution_Report.xlsx" "automation/reports/latest/"
           fi
 
-          # Guarantee non-empty directories for artifact packaging
           touch "automation/screenshots/.gitkeep"
           touch "automation/logs/.gitkeep"
           touch "automation/allure-results/.gitkeep"
@@ -276,12 +239,14 @@ jobs:
           ls -la "automation/Test Results/Excel/"
           
           if [ ! -f "automation/reports/latest/Execution_Report.xlsx" ]; then
-            echo "WARNING: Execution_Report.xlsx missing in reports/latest/"
+            echo "ERROR: Execution_Report.xlsx missing in reports/latest/"
+            exit 1
           fi
           if [ ! -f "automation/reports/latest/index.html" ]; then
             echo "ERROR: index.html missing in reports/latest/!"
             exit 1
           fi
+          echo "✔ Artifact validation successful."
 
       - name: Upload Artifacts to GitHub Actions
         if: always()
@@ -322,7 +287,6 @@ jobs:
           echo "=== 3. Consolidating HTML & Excel Reports into Public Folder ==="
           mkdir -p public
           
-          # Handle nested directory structures produced by artifact extraction
           if [ -f downloaded-reports/index.html ]; then
             cp -r downloaded-reports/* public/
           elif [ -d downloaded-reports/latest ]; then
@@ -336,7 +300,6 @@ jobs:
             fi
           fi
           
-          # Ensure Execution_Report.xlsx is available at site root for HTML download button
           if [ ! -f public/Execution_Report.xlsx ]; then
             EXCEL_SRC=$(find downloaded-reports -name "Execution_Report.xlsx" | head -n 1)
             if [ -n "$EXCEL_SRC" ]; then
