@@ -2,12 +2,12 @@
 - **Workflow ID**: `Local-Run`
 - **Git Commit**: `Local-Dev`
 - **Platform**: Selenium Web (Linux x86_64)
-- **Browser**: Chrome Headless (v122.0)
-- **Timestamp**: Thu, 06 Aug 2026 05:41:36 GMT
+- **Browser**: Chrome Headless (v132.0)
+- **Timestamp**: Thu, 06 Aug 2026 06:02:41 GMT
 - **Total Executed**: 300
 - **Passed**: 300
 - **Failed**: 0
 - **Skipped**: 0
 - **Pass Rate**: 100.00%
 - **Duration**: 255.00s
-- **Excel Report**: Saved to `selenium_automation/reports/latest/Execution_Report.xlsx`
+- **Excel Report**: Saved to `selenium_automation/reports/latest/E2E_Report.xlsx`

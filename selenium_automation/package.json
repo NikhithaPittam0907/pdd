@@ -1,14 +1,28 @@
 {
-  "name": "selenium-automation",
+  "name": "selenium-react-e2e-framework",
   "version": "1.0.0",
-  "description": "Selenium Web E2E Automation Framework for LexisAI",
+  "description": "Enterprise Selenium WebDriver E2E Automation Framework for React in Node.js",
   "main": "index.js",
   "scripts": {
-    "test": "mvn clean test -Dsurefire.suiteXmlFiles=testng.xml",
+    "test": "mocha --config .mocharc.json tests/**/*.spec.js",
+    "test:auth": "mocha --config .mocharc.json tests/Authentication.spec.js",
+    "test:form": "mocha --config .mocharc.json tests/FormValidation.spec.js",
+    "test:ui": "mocha --config .mocharc.json tests/UITesting.spec.js",
+    "test:nav": "mocha --config .mocharc.json tests/Navigation.spec.js",
+    "test:dynamic": "mocha --config .mocharc.json tests/DynamicFormDiscovery.spec.js",
     "generate-tests": "node generate_tests.js",
     "report": "node generate_report.js"
   },
   "dependencies": {
-    "exceljs": "^4.4.0"
+    "chai": "^4.3.10",
+    "chromedriver": "^132.0.0",
+    "exceljs": "^4.4.0",
+    "geckodriver": "^4.5.0",
+    "mocha": "^10.8.2",
+    "mochawesome": "^7.1.3",
+    "mochawesome-merge": "^4.3.0",
+    "mochawesome-report-generator": "^6.2.0",
+    "selenium-webdriver": "^4.28.0",
+    "winston": "^3.17.0"
   }
 }

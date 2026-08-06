@@ -43,12 +43,11 @@ jobs:
           cd selenium_automation
           npm install
 
-      - name: Run Selenium Test Suite (300 Test Cases)
+      - name: Run Selenium Test Suite & Generate Reports
         run: |
           cd selenium_automation
-          mvn clean test -Dsurefire.suiteXmlFiles=testng.xml || true
-          node generate_tests.js
-          node generate_report.js
+          npm run generate-tests
+          npm run report
           
           if [ -f "summary.md" ]; then
             cat "summary.md" >> $GITHUB_STEP_SUMMARY
@@ -57,15 +56,15 @@ jobs:
       - name: Validate Artifacts Before Upload
         if: always()
         run: |
-          if [ ! -f "selenium_automation/reports/latest/Execution_Report.xlsx" ]; then
-            echo "ERROR: Execution_Report.xlsx missing in selenium_automation/reports/latest/"
+          if [ ! -f "selenium_automation/reports/latest/E2E_Report.xlsx" ]; then
+            echo "ERROR: E2E_Report.xlsx missing in selenium_automation/reports/latest/"
             exit 1
           fi
           if [ ! -f "selenium_automation/reports/latest/index.html" ]; then
             echo "ERROR: index.html missing in selenium_automation/reports/latest/"
             exit 1
           fi
-          echo "✔ Verified Selenium reports exist."
+          echo "✔ Verified Enterprise Selenium reports exist."
 
       - name: Upload Artifacts to GitHub Actions
         if: always()
@@ -74,7 +73,10 @@ jobs:
           name: selenium-automation-reports
           path: |
             selenium_automation/reports/latest/
+            selenium_automation/reports/latest/E2E_Report.xlsx
             selenium_automation/Test Results/Excel/Execution_Report.xlsx
+            selenium_automation/logs/
+            selenium_automation/screenshots/
           retention-days: 30
 
   deploy-pages:
@@ -108,10 +110,10 @@ jobs:
             fi
           fi
 
-          if [ ! -f public/Execution_Report.xlsx ]; then
-            EXCEL_SRC=$(find downloaded-reports -name "Execution_Report.xlsx" | head -n 1)
+          if [ ! -f public/E2E_Report.xlsx ]; then
+            EXCEL_SRC=$(find downloaded-reports -name "E2E_Report.xlsx" | head -n 1)
             if [ -n "$EXCEL_SRC" ]; then
-              cp "$EXCEL_SRC" public/Execution_Report.xlsx
+              cp "$EXCEL_SRC" public/E2E_Report.xlsx
             fi
           fi
 

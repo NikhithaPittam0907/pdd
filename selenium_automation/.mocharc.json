@@ -1,0 +1,17 @@
+{
+  "diff": true,
+  "extension": ["js"],
+  "package": "./package.json",
+  "reporter": "mochawesome",
+  "reporter-option": [
+    "reportDir=reports/mochawesome",
+    "reportFilename=selenium_e2e_report",
+    "quiet=true",
+    "overwrite=true",
+    "html=true",
+    "json=true"
+  ],
+  "slow": 75,
+  "timeout": 60000,
+  "ui": "bdd"
+}
