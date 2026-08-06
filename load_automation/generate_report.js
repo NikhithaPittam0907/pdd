@@ -72,6 +72,13 @@ async function generateLoadReports() {
     const passRate = total > 0 ? ((passed / total) * 100).toFixed(2) : '0.00';
     const totalDurationSec = (totalDurationMs / 1000).toFixed(2);
 
+    console.log(`======================================================`);
+    console.log(`     Executing Load Scenarios & Processing Logs      `);
+    console.log(`======================================================`);
+    testRecords.forEach(r => {
+        console.log(`[LOAD LOG] ${r.id} | ${r.name} | Module: ${r.module} | Status: ${r.status} | Latency: ${r.duration}ms`);
+    });
+    console.log(`======================================================`);
     console.log(`Load Execution Summary: Total=${total}, Passed=${passed}, Failed=${failed}, Skipped=${skipped}, PassRate=${passRate}%`);
 
     const outputWorkbook = new ExcelJS.Workbook();

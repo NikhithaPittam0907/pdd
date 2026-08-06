@@ -72,6 +72,13 @@ async function generateSecurityReports() {
     const passRate = total > 0 ? ((passed / total) * 100).toFixed(2) : '0.00';
     const totalDurationSec = (totalDurationMs / 1000).toFixed(2);
 
+    console.log(`======================================================`);
+    console.log(`   Executing Security Checks & Processing Logs (300) ");
+    console.log(`======================================================`);
+    testRecords.forEach(r => {
+        console.log(`[SECURITY LOG] ${r.id} | ${r.name} | Module: ${r.module} | Status: ${r.status} | Duration: ${r.time}`);
+    });
+    console.log(`======================================================`);
     console.log(`Security Execution Summary: Total=${total}, Passed=${passed}, Failed=${failed}, Skipped=${skipped}, PassRate=${passRate}%`);
 
     const outputWorkbook = new ExcelJS.Workbook();

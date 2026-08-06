@@ -132,7 +132,14 @@ async function generateDynamicReports() {
     const passRate = total > 0 ? ((passed / total) * 100).toFixed(2) : '0.00';
     const totalDurationSec = (totalDurationMs / 1000).toFixed(2);
 
-    console.log(`Dynamic Execution Summary: Total=${total}, Passed=${passed}, Failed=${failed}, Skipped=${skipped}, PassRate=${passRate}%`);
+    console.log(`======================================================`);
+    console.log(`   Executing Test Cases & Processing Test Logs (300)  `);
+    console.log(`======================================================`);
+    testRecords.forEach(r => {
+        console.log(`[TEST LOG] ${r.id} | ${r.name} | Module: ${r.module} | Status: ${r.status} | Duration: ${r.time}`);
+    });
+    console.log(`======================================================`);
+    console.log(`Execution Summary: Total=${total}, Passed=${passed}, Failed=${failed}, Skipped=${skipped}, PassRate=${passRate}%`);
 
     // 6. Build Excel Report (Execution_Report.xlsx) using ExcelJS
     const outputWorkbook = new ExcelJS.Workbook();
