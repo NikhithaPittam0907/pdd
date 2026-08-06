@@ -81,31 +81,7 @@ jobs:
           emulator-boot-timeout: 1200
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -memory 4096
-          script: |
-            echo "Waiting for emulator..."
-            adb wait-for-device
-            until adb shell getprop sys.boot_completed | grep -m 1 "1"; do echo "Still booting..."; sleep 5; done
-            echo "Emulator booted successfully"
-
-            echo "ADB Devices:"
-            adb devices
-            echo "Android Version:"
-            adb shell getprop ro.build.version.release
-
-            adb shell settings put global window_animation_scale 0
-            adb shell settings put global transition_animation_scale 0
-            adb shell settings put global animator_duration_scale 0
-
-            APK_PATH="build/app/outputs/flutter-apk/app-debug.apk"
-            adb install -r "$APK_PATH"
-
-            cd automation
-            node generate_tests.js || true
-            npx appium driver install uiautomator2 || true
-            npx appium > logs/appium.log 2>&1 &
-
-            sleep 15
-            npm run wdio || true
+          script: bash automation/run_e2e_tests.sh
 
       - name: Generate Dynamic Reports (300 Cases)
         if: always()
