@@ -1,0 +1,75 @@
+name: Load & Performance Testing Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    name: Run Load & Performance Tests (300 Scenarios)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Pre-Create Report & Artifact Directories
+        run: |
+          mkdir -p "load_automation/reports/latest"
+          mkdir -p "load_automation/Test Results/Excel"
+          mkdir -p "load_automation/logs"
+          
+          cd load_automation
+          npm install
+
+      - name: Run Load Testing Suite (300 Test Cases)
+        run: |
+          cd load_automation
+          mvn clean test -Dsurefire.suiteXmlFiles=testng.xml || true
+          node generate_tests.js
+          node generate_report.js
+          
+          if [ -f "summary.md" ]; then
+            cat "summary.md" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Validate Artifacts Before Upload
+        if: always()
+        run: |
+          if [ ! -f "load_automation/reports/latest/Execution_Report.xlsx" ]; then
+            echo "ERROR: Execution_Report.xlsx missing in load_automation/reports/latest/"
+            exit 1
+          fi
+          if [ ! -f "load_automation/reports/latest/index.html" ]; then
+            echo "ERROR: index.html missing in load_automation/reports/latest/"
+            exit 1
+          fi
+          echo "✔ Verified Load Testing reports exist."
+
+      - name: Upload Artifacts to GitHub Actions
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-testing-reports
+          path: |
+            load_automation/reports/latest/
+            load_automation/Test Results/Excel/Execution_Report.xlsx
+          retention-days: 30

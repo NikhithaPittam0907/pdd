@@ -9,8 +9,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 jobs:
   test:
@@ -78,59 +76,3 @@ jobs:
             selenium_automation/logs/
             selenium_automation/screenshots/
           retention-days: 30
-
-  deploy-pages:
-    name: Publish Selenium Reports to GitHub Pages
-    needs: test
-    if: always()
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Download Automation Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: selenium-automation-reports
-          path: downloaded-reports
-
-      - name: Consolidate Pages Site
-        run: |
-          mkdir -p public
-          if [ -f downloaded-reports/index.html ]; then
-            cp -r downloaded-reports/* public/
-          else
-            INDEX_DIR=$(find downloaded-reports -name "index.html" -exec dirname {} \; | head -n 1)
-            if [ -n "$INDEX_DIR" ]; then
-              cp -r "$INDEX_DIR"/* public/
-            fi
-          fi
-
-          if [ ! -f public/E2E_Report.xlsx ]; then
-            EXCEL_SRC=$(find downloaded-reports -name "E2E_Report.xlsx" | head -n 1)
-            if [ -n "$EXCEL_SRC" ]; then
-              cp "$EXCEL_SRC" public/E2E_Report.xlsx
-            fi
-          fi
-
-          ls -la public/
-          if [ ! -f public/index.html ]; then
-            echo "ERROR: index.html was not found!"
-            exit 1
-          fi
-
-      - name: Setup GitHub Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload Pages Artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: 'public'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
