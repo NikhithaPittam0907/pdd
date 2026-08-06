@@ -17,12 +17,20 @@ permissions:
 jobs:
   test:
     name: Run Appium Android E2E Tests
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 60
 
     steps:
       - name: 1. Checkout Repository
         uses: actions/checkout@v4
+
+      - name: 1b. Enable KVM Hardware Acceleration
+        run: |
+          echo "=== Enabling KVM Permissions for Hardware Virtualization ==="
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          ls -l /dev/kvm || true
 
       - name: 2. Setup Java 17 (Zulu JDK)
         uses: actions/setup-java@v4
@@ -94,14 +102,16 @@ jobs:
             adb wait-for-device
 
             BOOT=""
+            PROVISIONED=""
             # Poll sys.boot_completed property up to 240 times (240 * 5s = 1200s / 20 min)
             for i in {1..240}; do
               BOOT=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
-              if [ "$BOOT" = "1" ]; then
-                echo "✔ Android Emulator booted completely! (sys.boot_completed=1)"
+              PROVISIONED=$(adb shell settings get global device_provisioned 2>/dev/null | tr -d '\r')
+              if [ "$BOOT" = "1" ] && [ "$PROVISIONED" = "1" ]; then
+                echo "✔ Android Emulator booted completely! (sys.boot_completed=1, device_provisioned=1)"
                 break
               fi
-              echo "Waiting for Android system boot... ($i/240)"
+              echo "Waiting for Android system boot... ($i/240) [sys.boot_completed=$BOOT, device_provisioned=$PROVISIONED]"
               sleep 5
             done
             
@@ -112,6 +122,8 @@ jobs:
               echo "ERROR: Android Emulator failed to complete boot sequence within 20-minute timeout!"
               echo "=== Diagnostics: Connected ADB Devices ==="
               adb devices
+              echo "=== Diagnostics: Available AVDs ==="
+              emulator -list-avds 2>/dev/null || avdmanager list avd 2>/dev/null || echo "AVD list tool unavailable."
               echo "=== Diagnostics: Emulator Logs ==="
               cat ~/.android/avd/*.avd/emulator.log 2>/dev/null || cat ~/.android/avd/*.avd/*.log 2>/dev/null || echo "No emulator log file found."
               echo "=== Diagnostics: Device Logcat Output ==="
@@ -130,6 +142,7 @@ jobs:
             echo "=== Verifying ADB Device Status ==="
             adb devices
             adb shell getprop sys.boot_completed
+            adb shell settings get global device_provisioned
 
             # ----------------------------------------------------------------
             # Step 4: Verify APK Existence & Perform Resilient Installation with Retry
@@ -212,14 +225,14 @@ jobs:
             export ANDROID_VERSION="Android 11.0"
             npm run wdio
 
-      - name: 8. Generate Dynamic Reports (Excel, HTML, Allure)
+      - name: 8. Generate Dynamic Reports (Excel, HTML, Allure, Markdown)
         if: always()
         run: |
           echo "=== Generating Dynamic Execution Reports ==="
           cd automation
           export GITHUB_RUN_ID="${{ github.run_id }}"
           export GITHUB_SHA="${{ github.sha }}"
-          export EMULATOR_DEVICE="Pixel 6 Emulator"
+          export EMULATOR_DEVICE="Pixel 4 (API 30)"
           export ANDROID_VERSION="Android 11.0 (API 30)"
           
           node generate_tests.js || true
@@ -228,11 +241,31 @@ jobs:
           if command -v allure &> /dev/null || npx allure --version &> /dev/null; then
             npx allure generate allure-results --clean -o reports/latest/allure-report || true
           fi
+          
+          if [ -f "summary.md" ]; then
+            cat "summary.md" >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: 9. Validate & Upload Automation Artifacts
         if: always()
         run: |
           echo "=== Pre-Upload Artifact Verification ==="
+          mkdir -p "automation/reports/latest"
+          mkdir -p "automation/Test Results/Excel"
+          mkdir -p "automation/screenshots"
+          mkdir -p "automation/logs"
+          mkdir -p "automation/allure-results"
+          
+          # Copy Execution_Report.xlsx to reports/latest if missing
+          if [ -f "automation/Test Results/Excel/Execution_Report.xlsx" ] && [ ! -f "automation/reports/latest/Execution_Report.xlsx" ]; then
+            cp "automation/Test Results/Excel/Execution_Report.xlsx" "automation/reports/latest/"
+          fi
+
+          # Guarantee non-empty directories for artifact packaging
+          touch "automation/screenshots/.gitkeep"
+          touch "automation/logs/.gitkeep"
+          touch "automation/allure-results/.gitkeep"
+
           ls -la "automation/reports/latest/"
           ls -la "automation/Test Results/Excel/"
           
