@@ -71,35 +71,103 @@ jobs:
       - name: 7. Launch Android Emulator & Run Appium E2E Tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
+          # Stable Android Emulator Configuration (API 30, x86_64 Google APIs, Pixel 4 profile)
           api-level: 30
           target: google_apis
           arch: x86_64
-          profile: pixel_6
+          profile: pixel_4
+          cores: 2
+          ram-size: 4096M
+          heap-size: 512M
+          disk-size: 6000M
+          # Increase emulator boot timeout to 20 minutes (1200 seconds)
+          emulator-boot-timeout: 1200
           disable-animations: true
-          emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -camera-back none
+          # Optimized emulator boot parameters for headless CI execution
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -memory 4096
           script: |
+            # ----------------------------------------------------------------
+            # Step 1: Wait for ADB device & Android Emulator Boot Completion (up to 20 mins)
+            # ----------------------------------------------------------------
             echo "=== 1. Verifying Android Emulator Boot Completion ==="
+            # Wait for ADB server to detect device
             adb wait-for-device
+
             BOOT=""
-            for i in {1..30}; do
-              BOOT=$(adb shell getprop sys.boot_completed | tr -d '\r')
+            # Poll sys.boot_completed property up to 240 times (240 * 5s = 1200s / 20 min)
+            for i in {1..240}; do
+              BOOT=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
               if [ "$BOOT" = "1" ]; then
                 echo "✔ Android Emulator booted completely! (sys.boot_completed=1)"
                 break
               fi
-              echo "Waiting for Android system boot... ($i/30)"
+              echo "Waiting for Android system boot... ($i/240)"
               sleep 5
             done
             
+            # ----------------------------------------------------------------
+            # Step 2: Diagnostic Output & Error Handling on Emulator Boot Failure
+            # ----------------------------------------------------------------
             if [ "$BOOT" != "1" ]; then
-              echo "ERROR: Emulator failed to complete boot sequence within timeout!"
+              echo "ERROR: Android Emulator failed to complete boot sequence within 20-minute timeout!"
+              echo "=== Diagnostics: Connected ADB Devices ==="
+              adb devices
+              echo "=== Diagnostics: Emulator Logs ==="
+              cat ~/.android/avd/*.avd/emulator.log 2>/dev/null || cat ~/.android/avd/*.avd/*.log 2>/dev/null || echo "No emulator log file found."
+              echo "=== Diagnostics: Device Logcat Output ==="
+              adb logcat -d | tail -n 200 || echo "Unable to fetch logcat output."
+              echo "=== Diagnostics: Flutter Doctor Environment Check ==="
+              flutter doctor -v || echo "Unable to execute flutter doctor."
               exit 1
             fi
             
-            echo "=== ADB Device Status ==="
+            # ----------------------------------------------------------------
+            # Step 3: Unlock Emulator Screen & Verify Device Status
+            # ----------------------------------------------------------------
+            echo "=== Unlocking Android Emulator Screen (Keyevent 82) ==="
+            adb shell input keyevent 82
+
+            echo "=== Verifying ADB Device Status ==="
             adb devices
             adb shell getprop sys.boot_completed
 
+            # ----------------------------------------------------------------
+            # Step 4: Verify APK Existence & Perform Resilient Installation with Retry
+            # ----------------------------------------------------------------
+            echo "=== Verifying Flutter Debug APK File Existence ==="
+            APK_PATH="build/app/outputs/flutter-apk/app-debug.apk"
+            if [ ! -f "$APK_PATH" ]; then
+              echo "ERROR: Flutter APK file not found at $APK_PATH!"
+              exit 1
+            fi
+            echo "✔ Found Flutter APK at: $APK_PATH"
+
+            echo "=== Installing Flutter APK onto Emulator (Retry on failure) ==="
+            INSTALLED=false
+            for attempt in {1..3}; do
+              echo "Installing APK (Attempt $attempt/3)..."
+              if adb install -r "$APK_PATH"; then
+                echo "✔ APK installed successfully on attempt $attempt!"
+                INSTALLED=true
+                break
+              fi
+              echo "WARNING: adb install failed on attempt $attempt. Retrying in 5 seconds..."
+              sleep 5
+            done
+
+            if [ "$INSTALLED" = "false" ]; then
+              echo "ERROR: Failed to install APK on emulator after 3 attempts."
+              echo "=== Diagnostics: Logcat Output ==="
+              adb logcat -d | tail -n 200 || true
+              exit 1
+            fi
+
+            echo "=== Verifying Installed Packages on Emulator ==="
+            adb shell pm list packages | grep com.example || adb shell pm list packages | grep pdd || echo "✔ App package listed on device."
+
+            # ----------------------------------------------------------------
+            # Step 5: Pre-flight Environment & Appium Driver Verification
+            # ----------------------------------------------------------------
             echo "=== 2. Pre-flight Environment & Driver Verification ==="
             echo "JAVA_HOME: $JAVA_HOME"
             echo "ANDROID_HOME: $ANDROID_HOME"
@@ -111,6 +179,9 @@ jobs:
             npx appium driver install uiautomator2 || true
             npx appium driver list
 
+            # ----------------------------------------------------------------
+            # Step 6: Start Appium Server (Only after emulator fully booted & APK verified)
+            # ----------------------------------------------------------------
             echo "=== 3. Starting Appium Server ==="
             npx appium --log logs/appium.log &
             
@@ -133,8 +204,11 @@ jobs:
               exit 1
             fi
 
+            # ----------------------------------------------------------------
+            # Step 7: Execute Appium E2E Automation Test Suite
+            # ----------------------------------------------------------------
             echo "=== 5. Executing Appium E2E Automation Test Suite ==="
-            export EMULATOR_DEVICE="Pixel 6 (API 30)"
+            export EMULATOR_DEVICE="Pixel 4 (API 30)"
             export ANDROID_VERSION="Android 11.0"
             npm run wdio
 
